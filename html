@@ -1,0 +1,147 @@
+<!-- VIXO add-on: paste this whole block just before </body> in index.html -->
+<style>
+
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,video,canvas,svg{max-width:100%}
+.card h4,.card b,.m,.doc b{overflow-wrap:anywhere}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--pk)}
+.row>input:not([type=checkbox]):not([type=file]),.row>select{min-width:0}
+
+/* ---------- Laptop and desktop (1181px and wider): 3 columns that scale with the window ---------- */
+@media (min-width:1181px){
+  .app{grid-template-columns:clamp(190px,16vw,260px) minmax(0,1fr) clamp(300px,26vw,400px)}
+  nav.side,aside{height:100vh;height:100dvh}
+  nav.side{overflow-y:auto}
+  main{padding:clamp(18px,2vw,30px) clamp(20px,2.4vw,44px) 90px}
+}
+/* big monitors: keep the content a readable width, centred */
+@media (min-width:1700px){
+  main{width:100%;max-width:1480px;margin-inline:auto}
+}
+
+/* ---------- Tablet and small laptop (761px to 1180px): sidebar + content, chat opens as a panel ---------- */
+@media (min-width:761px) and (max-width:1180px){
+  .app{grid-template-columns:clamp(176px,22vw,220px) minmax(0,1fr)}
+  nav.side{overflow-y:auto;height:100vh;height:100dvh}
+  main{padding:20px clamp(16px,3vw,28px) 96px}
+  aside{height:100dvh;width:min(440px,100%);left:auto}
+  .hero{flex-wrap:wrap}
+}
+
+/* ---------- Skill rows: stop the six buttons squeezing the progress bar ---------- */
+@media (min-width:761px) and (max-width:1500px){
+  .sk{grid-template-columns:minmax(110px,150px) minmax(80px,1fr) auto}
+  .sk .row{grid-column:1/-1;justify-content:flex-start}
+}
+
+/* ---------- Cards and stat tiles: fluid columns that never overflow ---------- */
+.cols{grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr))}
+@media (min-width:761px){
+  .stats{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}
+}
+
+/* ---------- Hero and the 3D computer scale with the screen ---------- */
+.scene{--sc:.88;width:min(340px,100%);height:clamp(250px,32vw,330px)}
+.world{transform:rotateX(calc(var(--rx,-26)*1deg)) rotateY(calc(var(--ry,35)*1deg)) scale(var(--sc,.88))}
+@media (min-width:1500px){.scene{--sc:1;width:min(420px,100%);height:380px}}
+@media (max-width:760px){.scene{--sc:.8;height:clamp(240px,62vw,300px)}}
+@media (max-width:480px){.scene{--sc:.7}}
+@media (max-width:360px){.scene{--sc:.58;height:230px}}
+@media (max-width:760px){
+  .hero{flex-wrap:wrap}
+  .hero h2{font-size:clamp(40px,15vw,64px)}
+  .hero .row .btn{flex:1 1 auto;text-align:center}
+}
+
+/* ---------- Phones: chat fills the screen and stays above the keyboard and home bar ---------- */
+@media (max-width:1180px){
+  aside{height:100dvh;padding-bottom:env(safe-area-inset-bottom,0px)}
+  #fab{max-width:calc(100vw - 32px)}
+}
+
+/* ---------- Short screens, such as a phone turned sideways ---------- */
+@media (max-height:480px) and (orientation:landscape){
+  .scene{height:210px;--sc:.6}
+  nav.side{overflow-y:auto}
+}
+
+/* ---------- Touch screens: easier tapping ---------- */
+@media (pointer:coarse){
+  .btn,.nv,.chips button{min-height:40px}
+  .btn.sm{min-height:40px}
+}
+</style>
+<script>
+(function(){
+const A=[
+// [category, question, options, correct index, short explanation]
+['Quantitative','A train 120 m long passes a pole in 6 seconds. What is its speed?',['60 km/h','72 km/h','80 km/h','90 km/h'],1,'120 m ÷ 6 s = 20 m/s, and 20 × 3.6 = 72 km/h.'],
+['Quantitative','What is 15% of 240?',['30','32','36','40'],2,'240 × 15 ÷ 100 = 36.'],
+['Quantitative','Two numbers are in the ratio 3 : 5 and their sum is 160. What is the larger number?',['60','80','100','120'],2,'8 parts = 160, so 1 part = 20 and the larger number is 5 × 20 = 100.'],
+['Quantitative','An item bought for ₹800 is sold for ₹1,000. What is the profit percentage?',['20%','25%','30%','15%'],1,'Profit 200 ÷ cost 800 = 25%.'],
+['Quantitative','A pipe fills a tank in 12 hours and another empties it in 24 hours. With both open, how long to fill the tank?',['12 hours','18 hours','24 hours','36 hours'],2,'Net rate = 1/12 − 1/24 = 1/24 per hour.'],
+['Quantitative','The average of 5 numbers is 20. Four of them are 10, 15, 25 and 30. What is the fifth?',['15','20','25','30'],1,'Total = 100. The four add up to 80, so the fifth is 20.'],
+['Quantitative','What is the simple interest on ₹5,000 at 8% per year for 3 years?',['₹1,000','₹1,200','₹1,400','₹1,600'],1,'5000 × 8 × 3 ÷ 100 = 1,200.'],
+['Quantitative','A can finish a job in 10 days and B in 15 days. Working together, how many days?',['5','6','7','8'],1,'1/10 + 1/15 = 1/6 per day.'],
+['Quantitative','A coin and a die are thrown together. What is the probability of a head and a 6?',['1/6','1/8','1/12','1/2'],2,'1/2 × 1/6 = 1/12.'],
+['Quantitative','A price of ₹100 rises by 20% and then falls by 20%. What is the final price?',['₹100','₹96','₹104','₹98'],1,'100 × 1.2 = 120, then 120 × 0.8 = 96.'],
+['Quantitative','In how many ways can the letters of the word CAT be arranged?',['3','6','9','12'],1,'3! = 6.'],
+['Quantitative','What is the LCM of 12 and 18?',['24','36','48','72'],1,'12 = 2²×3 and 18 = 2×3², so LCM = 2²×3² = 36.'],
+['Logical','Find the next number: 2, 6, 12, 20, 30, ?',['40','42','44','46'],1,'The differences are 4, 6, 8, 10, so the next is +12 = 42.'],
+['Logical','Find the next number: 3, 6, 12, 24, ?',['36','42','48','54'],2,'Each number doubles.'],
+['Logical','Which is the odd one out: 2, 3, 5, 9, 11?',['2','5','9','11'],2,'All the others are prime. 9 = 3 × 3.'],
+['Logical','If CAT is coded as 3120 (using letter positions), how is DOG coded?',['4157','4167','3157','4156'],0,'D = 4, O = 15, G = 7.'],
+['Logical','Pointing to a man, a woman says, “He is the son of my mother’s only brother.” How is he related to her?',['Brother','Cousin','Uncle','Nephew'],1,'Her mother’s brother is her maternal uncle, and his son is her cousin.'],
+['Logical','Ravi walks 5 km north, then 3 km east, then 5 km south. How far is he from the start?',['3 km','5 km','8 km','13 km'],0,'The north and south legs cancel out, leaving 3 km east.'],
+['Logical','All pens are books. All books are papers. Which conclusion is definitely true?',['All pens are papers','All papers are pens','Some papers are not books','No pen is a paper'],0,'Pens ⊂ books ⊂ papers.'],
+['Logical','What is the angle between the clock hands at 3:00?',['60°','90°','120°','180°'],1,'Each hour mark is 30°, and 3 hours = 90°.'],
+['Logical','Rina is twice as old as Mina. In 5 years the sum of their ages will be 40. How old is Mina now?',['8','10','12','15'],1,'Now: m + 2m = 3m. In 5 years: 3m + 10 = 40, so m = 10.'],
+['Logical','Find the next letter: A, C, F, J, ?',['N','O','P','M'],1,'Positions 1, 3, 6, 10 add +2, +3, +4, so the next is +5 = 15 = O.'],
+['Logical','In a row of 20 students, Asha is 8th from the left. What is her position from the right?',['11th','12th','13th','14th'],2,'20 − 8 + 1 = 13.'],
+['Logical','Book : Reading :: Fork : ?',['Cooking','Eating','Kitchen','Metal'],1,'A book is used for reading, and a fork is used for eating.'],
+['Logical','Some doctors are teachers. All teachers are kind. Which conclusion follows?',['Some doctors are kind','No doctor is kind','All doctors are teachers','All kind people are teachers'],0,'Those doctors who are teachers are kind.'],
+['Logical','If today is Tuesday, what day will it be after 100 days?',['Wednesday','Thursday','Friday','Saturday'],1,'100 = 14 weeks + 2 days, so Tuesday + 2 = Thursday.'],
+['Logical','Which is the odd one out: triangle, square, circle, pentagon?',['Triangle','Square','Circle','Pentagon'],2,'The others are polygons with straight sides.'],
+['Puzzle','If 5 machines make 5 widgets in 5 minutes, how long do 100 machines take to make 100 widgets?',['1 minute','5 minutes','20 minutes','100 minutes'],1,'Each machine makes one widget in 5 minutes, so 100 machines make 100 in 5 minutes.'],
+['Puzzle','A bat and a ball cost ₹1.10 together. The bat costs ₹1 more than the ball. What does the ball cost?',['₹0.10','₹0.05','₹0.15','₹0.01'],1,'Ball = x, bat = x + 1, so 2x + 1 = 1.10 and x = 0.05.'],
+['Puzzle','How many edges does a cube have?',['6','8','12','16'],2,'4 on top, 4 on the bottom and 4 vertical = 12.'],
+['Puzzle','Find the next number: 1, 1, 2, 3, 5, 8, ?',['11','12','13','14'],2,'Each number is the sum of the two before it (Fibonacci): 5 + 8 = 13.'],
+['Puzzle','All roses are flowers. Some flowers fade quickly. Which statement is correct?',['Some roses definitely fade quickly','No rose fades quickly','It cannot be determined whether any rose fades quickly','All flowers are roses'],2,'The flowers that fade might not be roses.']];
+
+const shuf=l=>{const a=[...l];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const mix=q=>{const o=shuf(q[2].map((t,i)=>[t,i===q[3]]));return[q[0],q[1],o.map(x=>x[0]),o.findIndex(x=>x[1]),q[4]]};
+const SETS={
+ mix:['Quick mix',5,()=>A],
+ quant:['Quantitative',8,()=>A.filter(q=>q[0]==='Quantitative')],
+ logic:['Logical reasoning',8,()=>A.filter(q=>q[0]==='Logical')],
+ full:['Full aptitude test',15,()=>A]};
+const apt=()=>(S.apt=S.apt||{best:{},att:{}});
+
+function aptHome(){const a=apt();
+ return `<h3 class="sec">Aptitude &amp; logical thinking</h3>
+ <div class="note">Practise the reasoning questions used in campus placement tests. Questions and answer order are shuffled every time, and you can retry as often as you like. These scores don’t change your skill percentages.</div>
+ <div class="cols">${Object.entries(SETS).map(([k,s])=>`<div class="card"><span class="tag">${k==='full'?'Test':'Practice'}</span><h4>${s[0]}</h4><p class="mute" style="margin:0 0 12px">${s[1]} questions${a.att[k]?` · best ${a.best[k]}% · tried ${a.att[k]}×`:''}</p><button class="btn" data-apt="${k}">${a.att[k]?'Try again':'Start'}</button></div>`).join('')}</div>`}
+
+function aptResult(){const n=Q.list.length,c=Q.c,p=Math.round(c/n*100),a=apt();
+ const wrong=Q.list.map((q,i)=>[q,i]).filter(([q,i])=>!Q.res[i]);
+ return `<div class="card"><h3 class="sec" style="margin-top:0">${esc(Q.title)} complete</h3><p>You scored <b>${c}/${n}</b> (${p}%). Your best for this set is ${a.best[Q.cat]}%.</p>
+ <div class="bar" style="margin:6px 0 16px"><i style="width:${p}%"></i></div>
+ ${wrong.length?`<b>Review your misses</b>`+wrong.map(([q])=>`<div class="doc"><div><span class="tag">${esc(q[0])}</span></div><div>${esc(q[1])}</div><div><b>Answer: ${esc(q[2][q[3]])}</b></div><div class="mute">${esc(q[4])}</div></div>`).join(''):'<p><b>Perfect score! 🎉</b></p>'}
+ <div class="row" style="margin-top:14px"><button class="btn" data-apt="${Q.cat}">Try again</button><button class="btn alt" data-q="end">Back to quizzes</button></div></div>`}
+
+const _quizzes=window.quizzes,_finishQ=window.finishQ;
+window.quizzes=function(){
+ if(Q&&Q.kind==='apt'&&!Q.list[Q.i])return aptResult();
+ return Q?_quizzes():_quizzes()+aptHome()};
+window.finishQ=function(){
+ if(Q&&Q.kind==='apt'){const a=apt(),n=Q.list.length;Q.c=Q.res.filter(Boolean).length;
+  a.att[Q.cat]=(a.att[Q.cat]||0)+1;a.best[Q.cat]=Math.max(a.best[Q.cat]||0,Math.round(Q.c/n*100));save();return}
+ return _finishQ.apply(this,arguments)};
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-apt]');if(!b)return;const k=b.dataset.apt,s=SETS[k];if(!s)return;
+ Q={kind:'apt',cat:k,title:s[0],list:shuf(s[2]()).slice(0,s[1]).map(mix),pts:0,i:0,a:null,res:[]};
+ tab='quizzes';render();window.scrollTo(0,0)});
+render();
+})();
+</script>
