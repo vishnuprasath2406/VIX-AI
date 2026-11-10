@@ -807,5 +807,47 @@ function analysis(){
 render();
 });
 </script>
+
+<!-- ===== AI DRAWER: button opens a right-side sidebar page ===== -->
+<style>
+/* layout no longer reserves a column for the assistant */
+.app{grid-template-columns:232px minmax(0,1fr)}
+@media (min-width:1500px){.app{grid-template-columns:260px minmax(0,1fr)}}
+@media (max-width:760px){.app{grid-template-columns:1fr}}
+/* the drawer */
+aside#side{position:fixed;top:0;right:0;bottom:0;left:auto;inset:0 0 0 auto;width:min(430px,100%);height:100%;z-index:60;display:flex;flex-direction:column;background:#14111d;border-left:1px solid var(--line);box-shadow:-18px 0 40px rgba(0,0,0,.5);transform:translateX(105%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s;-webkit-backdrop-filter:none;backdrop-filter:none}
+aside#side.open{transform:none;visibility:visible;transition:transform .28s ease}
+aside#side>*{flex:none}
+aside#side #log{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 20px;gap:10px;align-content:start}
+.ahead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 4px}
+.ahead h2{margin:0;padding:0;font-size:18px}
+aside#side>p.mute{padding:0 20px 10px!important;margin:0!important;text-align:left}
+#close{display:inline-flex;margin:0;align-self:auto;min-width:36px}
+#log .m{padding:10px 14px;font-size:13px;line-height:1.55;text-align:left}
+#log .m.b{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+#log .m.u{justify-self:end}
+.chips{padding:8px 20px}
+#f{padding:12px 20px calc(16px + env(safe-area-inset-bottom,0px))}
+/* floating button on every screen size */
+#fab{display:inline-flex;align-items:center;gap:6px;position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:50}
+body.chat-open #fab{display:none}
+#ov{position:fixed;inset:0;z-index:55;background:rgba(10,8,18,.55);opacity:0;pointer-events:none;transition:opacity .28s}
+body.chat-open #ov{opacity:1;pointer-events:auto}
+</style>
+<script>
+(()=>{
+ const side=document.getElementById('side'),h2=side.querySelector('h2'),cl=document.getElementById('close');
+ const head=document.createElement('div');head.className='ahead';
+ cl.textContent='✕';cl.setAttribute('aria-label','Close assistant');
+ head.append(h2,cl);side.insertBefore(head,side.firstChild);
+ const ov=document.createElement('div');ov.id='ov';document.body.appendChild(ov);
+ const open=()=>side.classList.add('open'),shut=()=>side.classList.remove('open');
+ document.getElementById('fab').onclick=open;cl.onclick=shut;ov.onclick=shut;
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')shut()});
+ new MutationObserver(()=>{const o=side.classList.contains('open');document.body.classList.toggle('chat-open',o);
+  if(o){const q=document.getElementById('q');setTimeout(()=>q&&q.focus(),300);const l=document.getElementById('log');l.scrollTop=l.scrollHeight}}
+ ).observe(side,{attributes:true,attributeFilter:['class']});
+})();
+</script>
 </body>
 </html>
