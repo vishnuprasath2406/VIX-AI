@@ -1,4 +1,653 @@
-<!-- ===== VIXO UPDATE ===== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VIXO — A Personalized Workspace</title>
+<meta name="theme-color" content="#0a0014">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5fb;--card:#fff;--ink:#1b2140;--mute:#6f7694;--pri:#4457ff;--pri2:#e8ebff;--ok:#18b27c;--warn:#ff8a3d;--line:#e4e8f4;--sh:0 4px 18px rgba(40,50,110,.07);
+--f:'Plus Jakarta Sans',system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1220;--card:#171b2e;--ink:#e8ebff;--mute:#98a0c4;--pri2:#232a55;--line:#262c48;--sh:none}}
+:root[data-theme="dark"]{--bg:#0f1220;--card:#171b2e;--ink:#e8ebff;--mute:#98a0c4;--pri2:#232a55;--line:#262c48;--sh:none}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:500 15px/1.5 var(--f)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr) 370px;min-height:100vh}
+.mute,.mono{color:var(--mute);font-size:13px}
+nav.side{background:var(--card);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;margin:0 6px 20px}
+.logo b{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--pri);color:#fff;font-size:15px}
+.nv{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;border:0;background:none;font-weight:600;color:var(--mute);cursor:pointer;text-align:left;width:100%}
+.nv:hover{background:var(--pri2);color:var(--ink)}
+.nv[aria-selected=true]{background:var(--pri);color:#fff;box-shadow:0 6px 14px rgba(68,87,255,.3)}
+.nv+.gap{margin-top:auto}
+.sep{margin:14px 14px 4px;font-size:12px;font-weight:700;color:var(--mute);letter-spacing:.04em}
+main{padding:24px 28px 90px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.top h1{font-size:26px;margin:0;font-weight:800}
+.av{width:42px;height:42px;border-radius:50%;background:var(--pri2);color:var(--pri);display:grid;place-items:center;font-weight:800}
+.hero{background:linear-gradient(120deg,#3f4fe8,#6f5bff);color:#fff;border-radius:22px;padding:28px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:0 12px 28px rgba(68,87,255,.28)}
+.hero h2{margin:0 0 6px;font-size:26px;font-weight:800}.hero p{margin:0 0 16px;opacity:.9;max-width:46ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:18px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--sh)}
+.stat b{display:block;font-size:30px;font-weight:800;margin:4px 0 0}
+.ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--pri2);margin-bottom:8px}
+h3.sec{font-size:18px;font-weight:800;margin:26px 0 12px;display:flex;justify-content:space-between;align-items:baseline}
+.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--pri);background:var(--pri2);border-radius:99px;padding:2px 10px}
+.course h4{margin:10px 0 12px;font-size:17px}
+.bar{height:8px;border-radius:99px;background:var(--pri2);overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--pri)}
+.bar.ok i{background:var(--ok)}
+.btn{display:inline-block;border:0;background:var(--pri);color:#fff;font-weight:700;border-radius:12px;padding:10px 18px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}.btn.alt{background:var(--pri2);color:var(--pri)}.btn.ghost{background:#fff;color:var(--pri)}.btn.sm{padding:6px 12px;font-size:13px;border-radius:10px}.btn.red{background:none;color:var(--warn)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.sb{justify-content:space-between}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px;max-width:100%}
+textarea{width:100%;min-height:60px}
+.sk{display:grid;grid-template-columns:150px 1fr auto auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.sk:last-child{border:0}.pc{font-weight:800;min-width:42px;text-align:right}
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}
+.task.done b{text-decoration:line-through;opacity:.5}.over{color:var(--warn);font-weight:700}
+.doc{display:grid;gap:6px;padding:14px 0;border-bottom:1px solid var(--line)}.doc:last-child{border:0}
+.note{background:var(--pri2);border-radius:14px;padding:12px 16px;margin:0 0 14px;font-size:14px}
+aside{position:sticky;top:0;height:100vh;border-left:1px solid var(--line);display:flex;flex-direction:column;background:var(--card)}
+aside h2{font-size:18px;font-weight:800;margin:0;padding:22px 20px 2px}
+#log{flex:1;overflow:auto;padding:12px 20px;display:grid;gap:10px;align-content:start}
+.m{max-width:92%;padding:10px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere}
+.m.u{justify-self:end;background:var(--pri);color:#fff;border-bottom-right-radius:4px}.m.b{background:var(--bg);border-bottom-left-radius:4px}
+.m .dl{display:inline-block;margin-top:8px;border:0;cursor:pointer;background:var(--pri);color:#fff;border-radius:10px;padding:4px 12px;font:700 14px var(--f)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 8px}
+.chips button{border:0;background:var(--pri2);color:var(--pri);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+#f{display:flex;gap:8px;padding:12px 20px 20px;border-top:1px solid var(--line)}#f input{flex:1;min-width:0}
+#fab{display:none}#close{display:none;margin:14px 20px 0;align-self:flex-start}
+@media (max-width:1180px){
+ .app{grid-template-columns:200px minmax(0,1fr)}
+ aside{position:fixed;inset:0;height:100%;z-index:30;display:none}aside.open{display:flex}
+ #fab{display:block;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;border-radius:99px;box-shadow:0 8px 20px rgba(68,87,255,.4)}
+ #close{display:inline-block}
+}
+@media (max-width:760px){
+ .app{grid-template-columns:1fr}
+ nav.side{position:static;height:auto;flex-direction:row;overflow-x:auto;padding:12px;gap:4px;border-right:0;border-bottom:1px solid var(--line)}
+ .logo,.sep,.nv+.gap{display:none}.nv{width:auto;white-space:nowrap;padding:8px 14px}
+ main{padding:18px 16px 90px}.sk{grid-template-columns:1fr auto}
+}
+.opt{display:block;width:100%;text-align:left;margin:8px 0}.opt.right{background:#18b27c;color:#fff}.opt.wrong{background:var(--warn);color:#fff}.btn:disabled{opacity:.5;cursor:default;filter:none}.m a{color:inherit;text-decoration:underline;overflow-wrap:anywhere}
+@media (max-width:760px){.sk .row,.sk .bar{grid-column:1/-1}}
+
+/* ===== cinematic 3D theme ===== */
+html:root:root{color-scheme:dark;--bg:#0c0c0d;--card:#141416;--ink:#f4f4f5;--mute:#9a9aa3;--pri:#ff7a1a;--pri2:rgba(255,122,26,.14);--ok:#2fd18b;--warn:#ff5d5d;--line:rgba(255,255,255,.09);--sh:0 24px 60px rgba(0,0,0,.55)}
+body{background:radial-gradient(900px 520px at 85% -8%,rgba(255,122,26,.20),transparent 62%),radial-gradient(700px 500px at -10% 40%,rgba(255,179,71,.07),transparent 60%),var(--bg);letter-spacing:-.005em}
+nav.side,aside{background:rgba(18,18,20,.5);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.logo b{background:linear-gradient(135deg,#ff7a1a,#ffb347);color:#1a0d00}
+.nv:hover{background:rgba(255,255,255,.06)}
+.nv[aria-selected=true]{background:linear-gradient(135deg,#ff7a1a,#ff9a3c);color:#1a0d00;box-shadow:0 10px 24px rgba(255,122,26,.35)}
+.btn{background:linear-gradient(135deg,#ff7a1a,#ffa24a);color:#1a0d00;box-shadow:0 8px 22px rgba(255,122,26,.3)}
+.btn.alt{background:rgba(255,255,255,.07);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
+.btn.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:none}
+.btn.red{background:none;box-shadow:none;border:0;color:var(--warn)}
+.av{background:var(--pri2);color:#ffb347}.tag{color:#ffb347}
+.bar{background:rgba(255,255,255,.08)}.bar i{background:linear-gradient(90deg,#ff7a1a,#ffc15e)}.bar.ok i{background:var(--ok)}
+.opt.right{background:var(--ok);color:#06210f}.opt.wrong{background:var(--warn);color:#2a0606}
+input,select,textarea{background:rgba(255,255,255,.05);color:var(--ink)}
+.m.u{background:linear-gradient(135deg,#ff7a1a,#ffa24a);color:#1a0d00}.m.b{background:rgba(255,255,255,.06)}
+.m .dl{background:#ff7a1a;color:#1a0d00}
+.chips button{background:rgba(255,255,255,.07);color:#ffb347}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),var(--card);border:1px solid var(--line)}
+.hero{position:relative;overflow:hidden;perspective:1200px;padding:34px;background:linear-gradient(135deg,#1c1209 0%,#2a1607 48%,#101011 100%);border:1px solid rgba(255,122,26,.28);box-shadow:var(--sh),inset 0 1px 0 rgba(255,255,255,.08)}
+.hero::before{content:"";position:absolute;top:-35%;right:-8%;width:55%;aspect-ratio:1;background:radial-gradient(circle,rgba(255,122,26,.38),transparent 65%);pointer-events:none}
+.hero>*{position:relative}
+.hero h2{font-size:clamp(30px,4.2vw,46px);line-height:1.05;letter-spacing:-.03em}
+.hero p.eyebrow{font:700 12px var(--f);letter-spacing:.16em;text-transform:uppercase;color:#ffb347;margin:0 0 10px;max-width:none}
+.stage{--rx:0deg;--ry:0deg;position:relative;width:300px;height:230px;flex:none;margin-right:24px;transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .15s ease-out}
+.layer{position:absolute;display:grid;gap:3px;border-radius:18px;padding:14px 16px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.03));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 26px 44px rgba(0,0,0,.5)}
+.layer b{font:800 34px/1 var(--f)}.layer span{font-size:12px;color:var(--mute)}
+.l1{inset:0 110px 60px 0;transform:translateZ(20px);align-content:center}
+.l2{right:0;top:30px;width:140px;transform:translateZ(75px);animation:fl 5s ease-in-out infinite}
+.l3{left:34px;bottom:0;width:190px;transform:translateZ(120px);background:linear-gradient(145deg,#ff7a1a,#ffa24a);color:#1a0d00;border-color:rgba(255,255,255,.3);animation:fl 6s ease-in-out infinite reverse}
+.l3 span{color:rgba(26,13,0,.75)}
+@keyframes fl{50%{translate:0 -9px}}
+.marq{overflow:hidden;white-space:nowrap;margin:20px 0 4px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.marq div{display:inline-block;animation:mq2 32s linear infinite}
+.marq span{margin:0 24px;font:700 13px var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.marq span::after{content:"✳";margin-left:48px;color:#ff7a1a}
+@keyframes mq2{to{transform:translateX(-50%)}}
+.cols .card,.stats .card{position:relative;transform-style:preserve-3d;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .18s ease-out,box-shadow .2s;will-change:transform}
+.cols .card:hover,.stats .card:hover{box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,122,26,.4)}
+.cols .card::after,.stats .card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.13),transparent 60%)}
+.cols .card:hover::after,.stats .card:hover::after{opacity:1}
+.cols .card h4,.cols .card .row,.stats .card b{transform:translateZ(26px)}
+.hero{flex-wrap:nowrap;gap:24px}.hero>div:first-child{flex:1;min-width:0}
+@media (max-width:760px){.hero{flex-wrap:wrap;padding:24px}.stage{margin:20px auto 0}}
+@media (max-width:1180px){aside{background:#0f0f11}}
+@media (prefers-reduced-motion:reduce){.l2,.l3,.marq div{animation:none}.stage,.cols .card,.stats .card{transition:none}}
+
+/* ===== video background + mobile ===== */
+html{overflow-x:hidden}
+#bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.bgo{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 520px at 85% -8%,rgba(255,122,26,.16),transparent 62%),linear-gradient(90deg,rgba(8,8,10,.62),rgba(8,8,10,.22))}
+.app{position:relative;z-index:1}
+.top h1,.top .mute,.brand{text-shadow:0 2px 14px rgba(0,0,0,.75)}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),rgba(20,20,22,.5)}
+@media (min-width:761px){.card{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}}
+.btn.sm{min-height:36px}
+@media (max-width:760px){#toplinks{display:none!important}}
+.wk{display:flex;gap:8px;align-items:flex-end;height:96px}.wk div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}.wk i{width:100%;max-width:34px;border-radius:6px;background:linear-gradient(180deg,#ffc15e,#ff7a1a)}.wk span{font-size:11px;color:var(--mute)}
+.brand{display:none;margin:0 0 4px;font-size:12px;color:var(--mute)}.brand b{color:#ffb347;letter-spacing:.14em}
+@media (max-width:760px){.brand{display:block}}
+@media (min-width:1500px){main{padding-left:44px;padding-right:44px}.app{grid-template-columns:260px minmax(0,1fr) 400px}}
+@media (max-width:760px){
+ nav.side{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;padding:10px 12px;gap:6px;-webkit-overflow-scrolling:touch}
+ .nv{padding:9px 14px;min-height:40px;font-size:14px}
+ main{padding:16px 14px 96px}
+ .top{flex-wrap:wrap;gap:8px}.top h1{font-size:22px}.top>.row>.btn{display:none}
+ .hero{padding:22px 18px;border-radius:18px}.hero h2{font-size:30px}.hero p{font-size:14px}
+ .stage{width:min(300px,100%);margin:20px auto 0}
+ .stats{grid-template-columns:1fr 1fr;gap:10px}.stat b{font-size:24px}.card{padding:16px;border-radius:16px}
+ h3.sec{font-size:17px;flex-wrap:wrap;gap:8px}
+ .sk{grid-template-columns:1fr auto;gap:8px 10px;padding:12px 0}.sk>b{grid-column:1}.sk .pc{grid-column:2;grid-row:1}.sk .bar{grid-column:1/-1;grid-row:2}.sk .row{grid-column:1/-1;grid-row:3}
+ .task{grid-template-columns:auto 1fr}.task .btn{grid-column:1/-1;justify-self:start}
+ form.row input:not([type=checkbox]),form.row select{flex:1 1 100%}
+ .marq span{margin:0 16px}
+ #f{padding:10px 14px calc(14px + env(safe-area-inset-bottom,0px))}#log{padding:10px 14px}.chips{padding:0 14px 8px}
+}
+@media (max-width:380px){.stats{grid-template-columns:1fr}.hero h2{font-size:26px}}
+
+/* ===== YOLO.EXE theme: neon on deep purple, detection boxes, 3D scene ===== */
+html:root:root{--bg:#0a0014;--card:#12001f;--ink:#fff;--mute:#bba9dd;--pri:#ff2bd6;--pri2:rgba(255,43,214,.14);--ok:#00e5ff;--warn:#ffe600;--line:rgba(255,255,255,.18);--pk:#ff2bd6;--yl:#ffe600;--cy:#00e5ff;--d:'Archivo Black',Impact,system-ui,sans-serif;--f:'Space Mono',ui-monospace,Menlo,Consolas,monospace;--sh:none}
+body{background:radial-gradient(900px 520px at 85% -8%,rgba(255,43,214,.22),transparent 62%),var(--bg);font-size:14px;letter-spacing:0}
+.bgo{background:radial-gradient(900px 520px at 85% -8%,rgba(255,43,214,.20),transparent 62%),linear-gradient(rgba(0,229,255,.07) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,rgba(0,229,255,.07) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,rgba(10,0,20,.74),rgba(10,0,20,.36))}
+nav.side,aside{background:rgba(10,0,20,.7)}
+@media (max-width:1180px){aside{background:#0a0014}}
+.logo{font-family:var(--d);text-transform:uppercase;letter-spacing:.02em}
+.logo b{background:var(--pk);color:#0a0014;border-radius:4px;box-shadow:3px 3px 0 var(--cy)}
+.nv{border-radius:4px;text-transform:uppercase;font-size:12.5px;letter-spacing:.05em}
+.nv:hover{background:rgba(255,255,255,.08)}
+.nv[aria-selected=true]{background:var(--yl);color:#0a0014;box-shadow:4px 4px 0 var(--pk)}
+.sep{color:var(--cy)}
+.av{background:var(--pk);color:#0a0014;border-radius:6px;font-family:var(--d)}
+.brand b{color:var(--yl)}
+.top h1,h3.sec,.card h4,.stat b,.pc,.layer b{font-family:var(--d);text-transform:uppercase;font-weight:400}
+.top h1{font-size:30px}
+h3.sec::before{content:"▣ ";color:var(--pk)}
+.btn{background:var(--yl);color:#0a0014;border:2px solid #0a0014;border-radius:6px;text-transform:uppercase;font-size:12.5px;letter-spacing:.04em;box-shadow:4px 4px 0 var(--pk);transition:transform .12s,box-shadow .12s}
+.btn:hover{filter:none;transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--pk)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--pk)}
+.btn.alt{background:rgba(10,0,20,.55);color:var(--cy);border:2px solid var(--cy);box-shadow:3px 3px 0 rgba(0,229,255,.35)}
+.btn.ghost{background:rgba(10,0,20,.55);color:var(--yl);border:2px solid var(--yl);box-shadow:3px 3px 0 var(--pk)}
+.btn.red{background:none;border:0;box-shadow:none;color:var(--warn)}
+.btn.sm{border-radius:4px}
+.card{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01)),rgba(18,0,31,.62);border:1px solid var(--line);border-radius:4px}
+.card::before{content:"";position:absolute;inset:-2px;pointer-events:none;border-radius:4px;background:linear-gradient(var(--cy),var(--cy)) 0 0/18px 3px,linear-gradient(var(--cy),var(--cy)) 0 0/3px 18px,linear-gradient(var(--cy),var(--cy)) 100% 0/18px 3px,linear-gradient(var(--cy),var(--cy)) 100% 0/3px 18px,linear-gradient(var(--cy),var(--cy)) 0 100%/18px 3px,linear-gradient(var(--cy),var(--cy)) 0 100%/3px 18px,linear-gradient(var(--cy),var(--cy)) 100% 100%/18px 3px,linear-gradient(var(--cy),var(--cy)) 100% 100%/3px 18px;background-repeat:no-repeat}
+.cols .card:hover,.stats .card:hover{box-shadow:6px 6px 0 var(--pk)}
+.cols .card:hover::before,.stats .card:hover::before{filter:hue-rotate(-90deg)}
+.tag{background:var(--pk);color:#0a0014;border-radius:2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.ico{border-radius:4px;background:rgba(255,230,0,.14)}
+.note{background:rgba(255,230,0,.08);border-left:4px solid var(--yl);border-radius:0}
+.bar{height:10px;border-radius:0;background:rgba(255,255,255,.1)}
+.bar i{border-radius:0;background:repeating-linear-gradient(90deg,var(--pk) 0 10px,var(--yl) 10px 20px)}
+.bar.ok i{background:var(--cy)}
+input,select,textarea{border:2px solid rgba(0,229,255,.55);border-radius:4px;background:rgba(10,0,20,.6)}
+.m{border-radius:4px}.m.u{background:var(--yl);color:#0a0014}.m.b{background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.m .dl{background:var(--pk);color:#0a0014;border-radius:3px}
+.chips button{background:none;border:1px solid var(--cy);color:var(--cy);border-radius:2px}
+#fab{border-radius:6px}
+.wk i{background:linear-gradient(180deg,var(--yl),var(--pk));border-radius:0}
+.hero{background:rgba(10,0,20,.55);border:2px solid var(--pk);border-radius:8px;box-shadow:8px 8px 0 var(--cy);padding:30px}
+.hero::before{background:radial-gradient(circle,rgba(255,43,214,.35),transparent 65%)}
+.hero p.eyebrow{color:var(--cy);letter-spacing:.14em}
+.hero h2{font:400 clamp(44px,7.4vw,88px)/.92 var(--d);text-transform:uppercase;letter-spacing:-.01em;margin:0}
+.hero h2 .ext{color:var(--yl)}
+.hero .tl{font:700 clamp(15px,2vw,22px) var(--f);margin:12px 0 14px}.tl em{color:var(--cy);font-style:normal}
+.scene{perspective:900px;position:relative;width:min(340px,100%);height:310px;flex:none;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.scene:active{cursor:grabbing}
+.world{position:absolute;left:50%;top:60%;width:0;height:0;transform-style:preserve-3d;transform:rotateX(calc(var(--rx,-26)*1deg)) rotateY(calc(var(--ry,35)*1deg)) scale(.88)}
+.hint{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:11px;color:var(--cy);pointer-events:none}
+.floor{position:absolute;left:-125px;top:-125px;width:250px;height:250px;transform:rotateX(90deg);border:2px solid var(--cy);background:linear-gradient(rgba(0,229,255,.28) 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,rgba(0,229,255,.28) 1px,transparent 1px) 0 0/34px 34px,rgba(10,0,20,.5);box-shadow:0 0 30px rgba(0,229,255,.25)}
+.b{position:absolute;left:0;top:0;width:28px;height:0;margin-left:-14px;transform-style:preserve-3d}
+.b i{position:absolute;left:0;width:28px;display:block;border:1px solid rgba(255,255,255,.4);background:var(--bc)}
+.b.dim{--bc:rgba(0,229,255,.2)}.b.pk{--bc:rgba(255,43,214,.78)}.b.yl{--bc:rgba(255,230,0,.8)}.b.cy{--bc:rgba(0,229,255,.82)}
+.b .f1,.b .f2,.b .f3,.b .f4{bottom:0;height:var(--h)}
+.b .f1{transform:translateZ(14px)}.b .f2{transform:rotateY(180deg) translateZ(14px)}
+.b .f3{transform:rotateY(90deg) translateZ(14px);filter:brightness(.8)}.b .f4{transform:rotateY(-90deg) translateZ(14px);filter:brightness(.7)}
+.b .f5{bottom:calc(var(--h) - 14px);height:28px;transform:rotateX(90deg);filter:brightness(1.3)}
+.b:hover i{filter:brightness(1.9);border-color:#fff}
+.fw{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;animation:fl 4s ease-in-out infinite}
+.fc{position:absolute;left:-17px;top:-17px;width:34px;height:34px;transform-style:preserve-3d;animation:spin 9s linear infinite}
+.fc.pk{--cc:var(--pk)}.fc.cy{--cc:var(--cy)}.fc.yl{--cc:var(--yl)}
+.fc i{position:absolute;inset:0;display:grid;place-items:center;border:2px solid var(--cc);background:rgba(10,0,20,.6);font:700 11px var(--f);color:var(--cc);font-style:normal}
+.fc i:nth-child(1){transform:translateZ(17px)}.fc i:nth-child(2){transform:rotateY(180deg) translateZ(17px)}.fc i:nth-child(3){transform:rotateY(90deg) translateZ(17px)}.fc i:nth-child(4){transform:rotateY(-90deg) translateZ(17px)}.fc i:nth-child(5){transform:rotateX(90deg) translateZ(17px)}.fc i:nth-child(6){transform:rotateX(-90deg) translateZ(17px)}
+@keyframes spin{to{transform:rotateX(360deg) rotateY(360deg)}}
+#log{grid-template-columns:minmax(0,1fr)}
+#log .m{width:max-content;min-width:0;max-width:100%}
+@media (max-width:760px){.scene{margin:8px auto 0}.hero{padding:20px 16px;box-shadow:5px 5px 0 var(--cy)}}
+@media (prefers-reduced-motion:reduce){.fw,.fc{animation:none}}
+
+/* ===== 3D computer ===== */
+.scene{height:330px}
+.world{top:58%}
+.rig{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;transform:translateY(30px)}
+.rig .floor{transform:rotateX(90deg) translateZ(-48px)}
+.bx{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+.bx i{position:absolute;display:block;font-style:normal;border:1px solid rgba(255,255,255,.35);background:var(--bc,#1b0a33)}
+.bx.dk{--bc:#1b0a33}.bx.wd{--bc:#3a1560}.bx.pk{--bc:rgba(255,43,214,.85)}.bx.cy{--bc:rgba(0,229,255,.75)}.bx.kb{--bc:#1b0a33}
+.bx .rt,.bx .lf{filter:brightness(.75)}.bx .tp{filter:brightness(1.3)}.bx .bt{filter:brightness(.5)}
+.bx.kb .tp{background:repeating-linear-gradient(90deg,transparent 0 9px,rgba(0,229,255,.6) 9px 10px),repeating-linear-gradient(0deg,transparent 0 9px,rgba(0,229,255,.6) 9px 10px),#1b0a33}
+.bx.mon .fr{border:3px solid var(--pk);background:#0a0014;box-shadow:0 0 22px rgba(255,43,214,.45)}
+.bx:hover i{border-color:#fff}
+.scr{position:absolute;inset:0;padding:7px 8px;font:700 8px/1.55 var(--f);color:var(--cy);text-align:left;overflow:hidden}
+.scr b{display:block;font:400 13px/1 var(--d);color:var(--yl);margin-bottom:5px}
+.scr u{display:block;height:5px;margin:1px 0 4px;text-decoration:none;background:rgba(255,255,255,.15)}.scr u s{display:block;height:100%;background:var(--pk)}
+.scr em{font-style:normal;animation:blink 1s steps(2) infinite;color:var(--yl)}
+@keyframes blink{50%{opacity:0}}
+.bx .pw{position:absolute;left:50%;top:10px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--yl);box-shadow:0 0 8px var(--yl)}
+.bx .sl{position:absolute;left:6px;right:6px;height:8px;background:#0a0014;border:1px solid var(--cy)}
+.bx .sl:nth-child(2){top:34px}.bx .sl:nth-child(3){top:48px}
+</style>
+</head>
+<body>
+<video id="bg" autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="landing.mp4" type="video/mp4"></video>
+<div class="bgo" aria-hidden="true"></div>
+<div class="app">
+<nav class="side" id="tabs" aria-label="Main"></nav>
+<main>
+ <div class="top"><div><p class="brand"><b>VIXO</b> · A Personalized workspace</p><p class="mute" style="margin:0" id="dt"></p><h1 id="ttl">Dashboard</h1></div><div class="row"><span id="toplinks" class="row"></span><div class="av">VP</div></div></div>
+ <div id="view"></div>
+</main>
+<aside id="side" aria-label="AI assistant">
+ <button class="btn alt sm" id="close">← Back</button>
+ <h2>✦ AI Assistant</h2>
+ <p class="mute" style="padding:0 20px;margin:2px 0 0">Ask about progress, plans or documents.</p>
+ <div id="log" aria-live="polite"></div>
+ <div class="chips" id="chips"></div>
+ <form id="f"><input id="q" placeholder="Ask me anything…" autocomplete="off" aria-label="Message"><button class="btn sm">Send</button></form>
+</aside>
+</div>
+<button class="btn" id="fab">✦ Ask AI</button>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today=()=>new Date().toLocaleDateString('en-CA');
+const uid=()=>Math.random().toString(36).slice(2,9);
+const MDN='https://developer.mozilla.org/en-US/docs/Learn_web_development';
+const SK=[['Languages',[['Python','https://docs.python.org/3/tutorial/'],['SQL','https://sqlbolt.com/'],['C','https://www.learn-c.org/']]],
+['Backend & Web',[['FastAPI','https://fastapi.tiangolo.com/tutorial/'],['Django','https://docs.djangoproject.com/en/stable/intro/tutorial01/'],['HTML',MDN],['CSS',MDN],['JavaScript','https://javascript.info/']]],
+['AI & Data',[['Data Analysis','https://pandas.pydata.org/docs/getting_started/index.html'],['MCP','https://modelcontextprotocol.io/introduction']]],
+['Core',[['Full-Stack Development','https://fullstackopen.com/en/'],['Automation','https://automatetheboringstuff.com/']]]];
+let S={skills:[],tasks:[],docs:[],lc:{days:{}}};
+let tab='dash',hist=[];
+function norm(){if(!Array.isArray(S.skills)||!S.skills.length||!S.skills[0].g){const o=Array.isArray(S.skills)?S.skills:[];
+ S.skills=SK.flatMap(([g,l])=>l.map(([n,u])=>({id:uid(),n,g,u,p:(o.find(x=>x.n===n)||{}).p||0})))}
+ S.cs=S.cs||{};S.skills=S.skills.filter(s=>s.g!=='Soft Skills');S.q=S.q||{};S.q.p=S.q.p||{};S.tasks=S.tasks||[];S.docs=S.docs||[];S.lc=S.lc||{days:{}};S.vw=S.vw||{};S.pl=S.pl||{};S.links=Object.assign({gh:'vishnuprasath2406',li:'https://www.linkedin.com/feed/',pf:'https://vishnuprasath2406.github.io/PORTFOLIO/'},S.links||{});S.lc.goal=S.lc.goal||100}
+try{const x=JSON.parse(localStorage.getItem('vp_ws')||'null');if(x)S=x}catch(e){}
+norm();
+function save(){try{localStorage.setItem('vp_ws',JSON.stringify(S))}catch(e){}}
+const solved=()=>Object.values(S.lc.days).reduce((a,b)=>a+b,0);
+function streak(){let d=new Date(),n=0;if(!S.lc.days[d.toLocaleDateString('en-CA')])d.setDate(d.getDate()-1);
+ while(S.lc.days[d.toLocaleDateString('en-CA')]>0){n++;d.setDate(d.getDate()-1)}return n}
+const mean=l=>l.length?Math.round(l.reduce((a,t)=>a+t.p,0)/l.length):0;
+const avg=()=>mean(S.skills);
+const due=()=>S.tasks.filter(t=>!t.done&&t.due&&t.due<=today());
+const lcPct=()=>Math.min(100,Math.round(solved()/(S.lc.goal||100)*100));
+const vDone=()=>S.skills.reduce((a,s)=>a+((S.vw[s.id]||{}).ta?1:0)+((S.vw[s.id]||{}).en?1:0),0);
+const vPct=()=>S.skills.length?Math.round(vDone()/(S.skills.length*2)*100):0;
+let GH={d:null,err:null,loading:false};
+const ghPct=()=>GH.d?Math.min(100,Math.round(GH.d.act/20*100)):0;
+const perfRows=()=>GH.d?[['Skills (quizzes)',avg(),'40%'],['LeetCode',lcPct(),'25%'],['Videos watched',vPct(),'15%'],['GitHub activity',ghPct(),'20%']]:[['Skills (quizzes)',avg(),'50%'],['LeetCode',lcPct(),'30%'],['Videos watched',vPct(),'20%']];
+const perf=()=>Math.round(perfRows().reduce((a,x)=>a+x[1]*parseInt(x[2])/100,0));
+const week=()=>{const o=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);o.push([d.toLocaleDateString('en',{weekday:'short'}).slice(0,2),S.lc.days[d.toLocaleDateString('en-CA')]||0])}return o};
+$('#dt').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+
+const CAT={ai:'AI & ML',py:'Python & DSA',be:'Backend & Web',cloud:'Cloud & DevOps',xr:'Vision & XR'};
+const CO=[
+['ml','Machine Learning Specialization','Coursera · DeepLearning.AI','ai','Data Analysis','https://www.coursera.org/specializations/machine-learning-introduction',0],
+['fastai','Practical Deep Learning for Coders','fast.ai','ai','Python','https://course.fast.ai/',1],
+['hfllm','LLM Course','Hugging Face','ai','Python','https://huggingface.co/learn/llm-course',1],
+['hfag','AI Agents Course','Hugging Face','ai','MCP','https://huggingface.co/learn/agents-course',1],
+['cs50ai','CS50’s Introduction to AI with Python','Harvard CS50','ai','Python','https://cs50.harvard.edu/ai/',1],
+['anth','Prompting & tool-use courses','Anthropic','ai','MCP','https://github.com/anthropics/courses',1],
+['cs50p','CS50’s Introduction to Programming with Python','Harvard CS50','py','Python','https://cs50.harvard.edu/python/',1],
+['cs50x','CS50x: Introduction to Computer Science','Harvard CS50','py','C','https://cs50.harvard.edu/x/',1],
+['neet','NeetCode Roadmap','NeetCode','py','Problem-Solving','https://neetcode.io/roadmap',0],
+['atbs','Automate the Boring Stuff with Python','Al Sweigart','py','Automation','https://automatetheboringstuff.com/',1],
+['fapi','FastAPI Tutorial','FastAPI docs','be','FastAPI','https://fastapi.tiangolo.com/tutorial/',1],
+['djg','Django Girls Tutorial','Django Girls','be','Django','https://tutorial.djangogirls.org/en/',1],
+['fso','Full Stack Open','University of Helsinki','be','Full-Stack Development','https://fullstackopen.com/en/',1],
+['odin','The Odin Project','The Odin Project','be','JavaScript','https://www.theodinproject.com/',1],
+['sql','SQL Tutorial','Mode','be','SQL','https://mode.com/sql-tutorial/',1],
+['sd','System Design Primer','GitHub','be','Full-Stack Development','https://github.com/donnemartin/system-design-primer',1],
+['git','Pro Git (book)','git-scm.com','cloud','Full-Stack Development','https://git-scm.com/book/en/v2',1],
+['dock','Docker: Get Started','Docker docs','cloud','Full-Stack Development','https://docs.docker.com/get-started/',1],
+['k8s','Kubernetes Basics','Kubernetes docs','cloud','Full-Stack Development','https://kubernetes.io/docs/tutorials/kubernetes-basics/',1],
+['aws','AWS Skill Builder','AWS','cloud','Full-Stack Development','https://skillbuilder.aws/',0],
+['mlops','MLOps Zoomcamp','DataTalksClub','cloud','Automation','https://github.com/DataTalksClub/mlops-zoomcamp',1],
+['yolo','Ultralytics YOLO docs','Ultralytics','xr','Data Analysis','https://docs.ultralytics.com/',1],
+['ue','Unreal Engine learning paths','Epic Games','xr','C','https://dev.epicgames.com/community/unreal-engine/learning',1]];
+let cf='all';const ST=['To do','Learning','Done'];
+const recC=(k,names)=>CO.filter(c=>(S.cs[c[0]]||0)<2&&names.includes(c[4])).concat(CO.filter(c=>(S.cs[c[0]]||0)<2)).filter((c,i,a)=>a.indexOf(c)===i).slice(0,k);
+function ccard(c){const s=S.cs[c[0]]||0;return `<div class="card course"><div class="row sb"><span class="tag">${CAT[c[3]]}</span>${c[6]?'<span class="tag">Free</span>':''}</div><h4>${esc(c[1])}</h4><p class="mute" style="margin:0 0 12px">${esc(c[2])} · builds ${esc(c[4])}</p><div class="row sb"><button class="btn ${s==2?'':'alt'} sm" data-cs="${c[0]}">${ST[s]}</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(c[5])}">Open ↗</a></div></div>`}
+function courses(){const n=k=>CO.filter(c=>(S.cs[c[0]]||0)===k).length;
+ return `<div class="note">Courses picked for a Python, AI and backend software engineering path. ${n(1)} learning · ${n(2)} done of ${CO.length}. Tap the status button to track each one.</div>
+ <div class="row" style="margin-bottom:14px">${[['all','All'],...Object.entries(CAT)].map(([k,v])=>`<button class="btn ${cf===k?'':'alt'} sm" data-cf="${k}">${v}</button>`).join('')}</div>
+ <div class="cols">${CO.filter(c=>cf==='all'||c[3]===cf).map(ccard).join('')}</div>`}
+const QN={C:'C programming',MCP:'Model Context Protocol MCP',Automation:'Python automation','Full-Stack Development':'full stack web development','Data Analysis':'data analysis with Python pandas'};
+const vids=n=>{const k=QN[n]||n,y=t=>'https://www.youtube.com/results?search_query='+encodeURIComponent(t);return{ta:y(k+' tutorial in Tamil'),en:y(k+' full course for beginners')}};
+const QB=[
+['Python','Which of these is mutable?',['tuple','string','list','int'],2],
+['Python','What is len({1,2,2,3})?',['4','3','2','1'],1],
+['Python','What does [x*2 for x in range(3)] return?',['[0, 2, 4]','[2, 4, 6]','[0, 1, 2]','[1, 2, 3]'],0],
+['SQL','Which clause filters rows after GROUP BY?',['WHERE','HAVING','ORDER BY','LIMIT'],1],
+['SQL','Which JOIN keeps all rows from the left table?',['INNER JOIN','LEFT JOIN','CROSS JOIN','SELF JOIN'],1],
+['SQL','Which keyword removes duplicate rows from results?',['UNIQUE','DISTINCT','ONLY','SINGLE'],1],
+['C','Which operator gives the address of a variable?',['*','&','->','#'],1],
+['C','What is sizeof(char) in C?',['1','2','4','8'],0],
+['C','Which function prints formatted output?',['print','printf','echo','cout'],1],
+['FastAPI','Which library does FastAPI use for data validation?',['Marshmallow','Pydantic','Cerberus','WTForms'],1],
+['FastAPI','Which server is commonly used to run a FastAPI app?',['Uvicorn','Nginx only','Apache Tomcat','Jenkins'],0],
+['FastAPI','Which decorator defines a GET endpoint?',['@app.get("/")','@app.fetch("/")','@app.read("/")','@app.route_get("/")'],0],
+['Django','Which file lists a Django app’s URL routes?',['views.py','urls.py','models.py','admin.py'],1],
+['Django','Which command applies database migrations?',['makemigrations','migrate','runserver','startapp'],1],
+['Django','In Django, what maps Python classes to database tables?',['Views','Templates','Models','Middleware'],2],
+['HTML','Which tag holds the page’s visible content?',['<head>','<body>','<meta>','<title>'],1],
+['HTML','Which tag creates a hyperlink?',['<a>','<link>','<href>','<url>'],0],
+['HTML','Which attribute gives alternative text for an image?',['title','alt','src','name'],1],
+['CSS','Which property changes text colour?',['font-color','color','text-style','fill'],1],
+['CSS','Which display value turns on flexbox?',['block','flex','inline','table'],1],
+['CSS','Which unit is relative to the root font size?',['px','rem','pt','cm'],1],
+['JavaScript','Which keyword declares a block-scoped variable you can reassign?',['var','let','const','def'],1],
+['JavaScript','What does typeof null return?',['"null"','"object"','"undefined"','"number"'],1],
+['JavaScript','Which array method adds an item to the end?',['pop','push','shift','unshift'],1],
+['Data Analysis','Which pandas structure is a 2D table?',['Series','DataFrame','ndarray','dict'],1],
+['Data Analysis','Which method shows the first 5 rows of a DataFrame?',['head()','top()','first()','peek()'],0],
+['Data Analysis','Which measure is least affected by outliers?',['Mean','Median','Range','Sum'],1],
+['MCP','What does MCP stand for?',['Model Context Protocol','Machine Control Process','Multi-Cloud Platform','Managed Compute Pipeline'],0],
+['MCP','What does MCP mainly let AI apps do?',['Compress images','Connect to external tools and data in a standard way','Train models faster','Host websites'],1],
+['MCP','In MCP, which side exposes tools and resources?',['Server','Browser','Compiler','Database driver'],0],
+['Full-Stack Development','Which HTTP method is typically used to create a resource?',['GET','POST','HEAD','TRACE'],1],
+['Full-Stack Development','Which status code means “Not Found”?',['200','301','404','500'],2],
+['Full-Stack Development','REST APIs rely on…',['Stateless requests over HTTP','Shared server memory','Binary RPC only','Persistent sockets only'],0],
+['Automation','Which Python module runs operating-system commands?',['json','subprocess','math','random'],1],
+['Automation','Which Unix tool schedules recurring jobs?',['grep','cron','tar','curl'],1],
+['Automation','Which library automates browser actions?',['NumPy','Selenium','Pandas','Flask'],1]];
+const rnd=seed=>{let a=0;for(const c of seed)a=(a*31+c.charCodeAt(0))|0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const pick=(l,n,seed)=>{const r=rnd(seed),a=[...l];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,n)};
+const wk=()=>{const d=new Date(),j=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil(((d-j)/864e5+j.getDay()+1)/7)};
+let Q=null;
+function startQ(k){if((k==='daily'&&S.q.d===today())||(k==='weekly'&&S.q.w===wk())||(k[0]==='p'&&S.q.p[k.slice(2)]===today())){Q=null;tab='quizzes';render();return}
+ if(k==='daily')Q={kind:'daily',title:'Daily quiz',list:pick(QB,5,'d'+today()),pts:2};
+ else if(k==='weekly')Q={kind:'weekly',title:'Weekly quiz',list:pick(QB,12,'w'+wk()),pts:3};
+ else{const s=S.skills.find(x=>x.id===k.slice(2));Q={kind:'p',sid:s.id,title:s.n+' practice',list:QB.filter(q=>q[0]===s.n),pts:2}}
+ Q.i=0;Q.a=null;Q.res=[];tab='quizzes';render()}
+function finishQ(){const g={};Q.list.forEach((q,i)=>{if(Q.res[i])g[q[0]]=(g[q[0]]||0)+Q.pts});
+ for(const[n,v]of Object.entries(g)){const s=S.skills.find(x=>x.n===n);if(s)s.p=Math.min(100,s.p+v)}
+ Q.gain=g;Q.c=Q.res.filter(Boolean).length;
+ if(Q.kind==='daily'){S.q.d=today();S.q.ds=Q.c}else if(Q.kind==='weekly'){S.q.w=wk();S.q.ws=Q.c}else S.q.p[Q.sid]=today();save()}
+function quizzes(){
+ if(Q){const q=Q.list[Q.i];
+  if(!q)return `<div class="card"><h3 class="sec" style="margin-top:0">${esc(Q.title)} complete</h3><p>You got <b>${Q.c}/${Q.list.length}</b> correct.</p><p class="mute">${Object.entries(Q.gain).map(([n,v])=>n+' +'+v+'%').join(' · ')||'No gains this time. Learn from the answers and try again later.'}</p><button class="btn" data-q="end">Back to quizzes</button></div>`;
+  return `<div class="card"><div class="row sb"><span class="tag">${esc(q[0])}</span><span class="mute">Question ${Q.i+1} of ${Q.list.length}</span></div><h3 style="margin:14px 0">${esc(q[1])}</h3>${q[2].map((o,k)=>`<button class="btn alt opt ${Q.a==null?'':k===q[3]?'right':Q.a===k?'wrong':''}" data-ans="${k}" ${Q.a==null?'':'disabled'}>${esc(o)}</button>`).join('')}${Q.a!=null?`<p><b>${Q.a===q[3]?'Correct! ✅':'Not quite. The answer is “'+esc(q[2][q[3]])+'”.'}</b></p><button class="btn" data-q="next">${Q.i+1<Q.list.length?'Next':'Finish'}</button>`:''}</div>`}
+ const dd=S.q.d===today(),ww=S.q.w===wk();
+ return `<div class="note">Your percentages rise only through quizzes. Daily quiz: +2% per correct answer. Weekly quiz: +3%. Skill practice: +2%, once per skill per day.</div>
+ <div class="cols"><div class="card"><span class="tag">Daily</span><h4>Daily quiz</h4><p class="mute">5 questions from your resume skills.${dd?` Today: ${S.q.ds}/5.`:''}</p><button class="btn" data-q="daily" ${dd?'disabled':''}>${dd?'Done · back tomorrow':'Start'}</button></div>
+ <div class="card"><span class="tag">Weekly</span><h4>Weekly quiz</h4><p class="mute">12 questions, one attempt a week.${ww?` This week: ${S.q.ws}/12.`:''}</p><button class="btn" data-q="weekly" ${ww?'disabled':''}>${ww?'Done · back next week':'Start'}</button></div></div>
+ <h3 class="sec">Practice by skill</h3><div class="cols">${S.skills.map(s=>`<div class="card"><div class="row sb"><b>${esc(s.n)}</b><span class="mute">${s.p}%</span></div><div class="bar" style="margin:10px 0"><i style="width:${s.p}%"></i></div><button class="btn alt sm" data-q="p:${s.id}" ${S.q.p[s.id]===today()?'disabled':''}>${S.q.p[s.id]===today()?'Done today':'Practice'}</button></div>`).join('')}</div>`}
+const mu=k=>'https://www.meetup.com/find/?keywords='+encodeURIComponent(k)+'&location=in--Chennai&source=EVENTS';
+const MT=[
+['mhome','Meetup: your home feed','Meetup','All tech','https://www.meetup.com/home/','Your personalised Meetup feed of groups and events you follow.'],
+['chennaipy','Chennaipy (Chennai Python User Group)','Meetup','Python','https://www.meetup.com/Chennaipy/','Regular meetups and talks for Pythonistas around Chennai.'],
+['chennaiai','Chennai AI Developers','Meetup','AI & ML','https://www.meetup.com/chennaiaidevs','Talks, workshops and code labs on AI, ML and generative AI.'],
+['gaic','Global AI Community Chennai','Meetup','AI & ML','https://www.meetup.com/global-ai-community-chennai/','Community-led AI sessions, including hands-on developer events.'],
+['cafi','Chennai AI Fluency Initiative (CAFI)','Meetup','AI & ML','https://www.meetup.com/chennai-ai-fluency-initiative-cafi/','Developers and builders exploring practical AI skills.'],
+['cccl','Claude Community Chennai','Luma','AI builders','https://luma.com/cccl','Claude community events and AI builder meetups in Chennai.'],
+['cm','CommunityMeetups: India tech calendar','Luma','All tech','https://luma.com/CommunityMeetups','Tech meetups, hackathons, conferences and webinars across India.'],
+['ldisc','Luma Discover','Luma','All tech','https://luma.com/discover','Browse public events by city and category, then choose Chennai.'],
+['tink','AI Tinkerers Chennai','Other','AI agents & RAG','https://chennai.aitinkerers.org/','Hands-on builder meetups with live demos.'],
+['devev','Dev.events: Chennai','Other','All tech','https://dev.events/meetups/AS/IN/Chennai','Meetups and conferences in Chennai, plus online ones.'],
+['s1','Search: Python events in Chennai','Meetup','Python',mu('python'),'Live Meetup search for Python events.'],
+['s2','Search: Django and backend events','Meetup','Backend',mu('django'),'Live Meetup search for Django and backend events.'],
+['s3','Search: Data science and ML events','Meetup','Data & ML',mu('data science'),'Live Meetup search for data science and ML events.'],
+['s4','Search: Cloud and DevOps events','Meetup','Cloud & DevOps',mu('docker kubernetes'),'Live Meetup search for Docker, Kubernetes and cloud events.']];
+let mf='all';
+function meetups(){
+ return `<div class="note">Tech meetups around Chennai for Python, AI and backend. Dates change often, so each card opens the platform’s live page. Tap “Remind me” to add a reminder to check back in a week.</div>
+ <div class="row" style="margin-bottom:14px"><a class="btn" target="_blank" rel="noopener" href="https://luma.com/discover">Open Luma Discover ↗</a><a class="btn" target="_blank" rel="noopener" href="https://www.meetup.com/home/">Open Meetup Home ↗</a></div>
+ <div class="row" style="margin-bottom:14px">${[['all','All'],['Meetup','Meetup'],['Luma','Luma'],['Other','Other sites']].map(([k,v])=>`<button class="btn ${mf===k?'':'alt'} sm" data-mf="${k}">${v}</button>`).join('')}</div>
+ <div class="cols">${MT.filter(m=>mf==='all'||m[2]===mf).map(m=>`<div class="card course"><div class="row sb"><span class="tag">${m[2]}</span><span class="mute">${esc(m[3])}</span></div><h4>${esc(m[1])}</h4><p class="mute" style="margin:0 0 12px">${esc(m[5])}</p><div class="row sb"><button class="btn alt sm" data-mr="${m[0]}">Remind me</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(m[4])}">Open ↗</a></div></div>`).join('')}</div>`}
+const PL=[
+['cg','CodinGame','game','Python','https://www.codingame.com/','Solve puzzles and bot battles in 25+ languages, from beginner to hard.'],
+['cio','CheckiO','game','Python','https://checkio.org/','Python missions across islands, with community solutions to learn from.'],
+['scr','Screeps','game','JavaScript','https://screeps.com/','An MMO where your code runs your colony. Real programming with real consequences.'],
+['elev','Elevator Saga','game','JavaScript','https://play.elevatorsaga.com/','Program elevators to move people efficiently. A real scheduling problem.'],
+['gitb','Learn Git Branching','game','Full-Stack Development','https://learngitbranching.js.org/','Visual puzzles that teach Git the way teams really use it.'],
+['froggy','Flexbox Froggy','game','CSS','https://flexboxfroggy.com/','Guide a frog to its lily pad with CSS flexbox.'],
+['diner','CSS Diner','game','CSS','https://flukeout.github.io/','Learn CSS selectors by picking the right food on the plates.'],
+['unt','Untrusted','game','JavaScript','https://alexnisnevich.github.io/untrusted/','A puzzle adventure where you edit the game’s own JavaScript to escape.'],
+['vim','Vim Adventures','game','Automation','https://vim-adventures.com/','Learn Vim commands by playing a Zelda-style game.'],
+['aoc','Advent of Code','real','Python','https://adventofcode.com/','Puzzle calendar that trains parsing, algorithms and problem solving.'],
+['kag','Kaggle Learn and competitions','real','Data Analysis','https://www.kaggle.com/learn','Short courses, then practice on real datasets and competitions.'],
+['cw','Codewars','real','Python','https://www.codewars.com/','Kata challenges ranked by difficulty. Compare your solution with others.'],
+['ex','Exercism','real','Python','https://exercism.org/','Practice exercises with free mentor feedback.'],
+['pico','picoCTF','real','Python','https://picoctf.org/','Security challenges based on real vulnerabilities: web, crypto and forensics.'],
+['otw','OverTheWire: Bandit','real','Automation','https://overthewire.org/wargames/bandit/','Learn the Linux command line by solving level-by-level problems.'],
+['ros','Rosalind','real','Python','https://rosalind.info/problems/locations/','Real bioinformatics problems solved with programming.'],
+['cdx','Codédex','story','Python','https://www.codedex.io/','A fantasy-world journey through Python, HTML, CSS, JavaScript and SQL.'],
+['cc','CodeCombat','story','Python','https://codecombat.com/','A role-playing adventure where Python or JavaScript controls your hero.'],
+['smm','SQL Murder Mystery','story','SQL','https://mystery.knightlab.com/','Solve a murder in SQL City by querying the evidence.'],
+['sqn','SQL Noir','story','SQL','https://www.sqlnoir.com/','Detective cases that you solve with SQL queries.'],
+['las','Lost at SQL','story','SQL','https://lost-at-sql.therobinlord.com/','A story game where each SQL query moves the plot forward.'],
+['pyc','The Python Challenge','story','Python','http://www.pythonchallenge.com/','A chain of riddles where each solution gives you the next page.']];
+let pf='all';const PLN={real:'Real-world problems',game:'Games',story:'Story-style'};
+function play(){const done=PL.filter(x=>S.pl[x[0]]).length,pc=Math.round(done/PL.length*100);
+ return `<div class="note">Learn by playing: real-world problem sets, coding games and story-style courses. Open one, play for a while, then tick it so your progress is tracked.</div>
+ <div class="card" style="margin-bottom:14px"><div class="row sb"><b>Tried so far</b><span class="mute">${done}/${PL.length} · ${pc}%</span></div><div class="bar" style="margin-top:8px"><i style="width:${pc}%"></i></div></div>
+ <div class="row" style="margin-bottom:14px">${[['all','All'],...Object.entries(PLN)].map(([k,v])=>`<button class="btn ${pf===k?'':'alt'} sm" data-pf="${k}">${v}</button>`).join('')}</div>
+ <div class="cols">${PL.filter(x=>pf==='all'||x[2]===pf).map(x=>`<div class="card course"><div class="row sb"><span class="tag">${PLN[x[2]]}</span><span class="mute">${esc(x[3])}</span></div><h4>${esc(x[1])}</h4><p class="mute" style="margin:0 0 12px">${esc(x[5])}</p><div class="row sb"><button class="btn alt sm" data-pp="${x[0]}">${S.pl[x[0]]?'✅ Tried':'☐ Mark tried'}</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(x[4])}">Play ↗</a></div></div>`).join('')}</div>`}
+const utc=i=>new Date(Date.now()-i*864e5).toISOString().slice(0,10);
+async function ghLoad(force){const u=S.links.gh;GH.err=null;
+ try{const c=JSON.parse(localStorage.getItem('vx_gh_'+u)||'null');if(c&&!force&&Date.now()-c.t<6e5){GH.d=c.d;return}}catch(e){}
+ GH.loading=true;if(tab==='github')render();
+ try{const j=async q=>{const r=await fetch('https://api.github.com'+q);if(!r.ok)throw new Error(r.status);return r.json()};
+  const [us,rp,ev]=await Promise.all([j('/users/'+u),j('/users/'+u+'/repos?per_page=100&sort=pushed'),j('/users/'+u+'/events/public?per_page=100')]);
+  const days={};ev.forEach(e=>{if(e.type==='PushEvent'){const d=e.created_at.slice(0,10);days[d]=(days[d]||0)+((e.payload&&e.payload.size)||1)}});
+  let act=0,c30=0;for(let i=0;i<30;i++){const n=days[utc(i)]||0;if(n){act++;c30+=n}}
+  let st=0,i=days[utc(0)]?0:1;while(days[utc(i)]){st++;i++}
+  const lg={};rp.forEach(x=>{if(x.language)lg[x.language]=(lg[x.language]||0)+1});
+  const d={login:us.login,name:us.name||us.login,avatar:us.avatar_url,since:(us.created_at||'').slice(0,4),repos:us.public_repos,followers:us.followers,stars:rp.reduce((a,x)=>a+x.stargazers_count,0),act,c30,streak:st,
+   week:[6,5,4,3,2,1,0].map(k=>[new Date(Date.now()-k*864e5).toLocaleDateString('en',{weekday:'short'}).slice(0,2),days[utc(k)]||0]),
+   langs:Object.entries(lg).sort((a,b)=>b[1]-a[1]).slice(0,5),
+   recent:rp.slice(0,5).map(x=>({n:x.name,u:x.html_url,l:x.language,s:x.stargazers_count,p:(x.pushed_at||'').slice(0,10)}))};
+  GH.d=d;try{localStorage.setItem('vx_gh_'+u,JSON.stringify({t:Date.now(),d}))}catch(e){}
+ }catch(e){GH.d=null;const m=String(e&&e.message);GH.err=m==='403'?'GitHub’s rate limit was reached. Try again in a few minutes.':m==='404'?'GitHub user not found. Check the username.':'Couldn’t reach GitHub from this page. This works on your GitHub Pages site.'}
+ GH.loading=false;if(tab==='github'||tab==='dash')render()}
+function github(){const L=S.links,d=GH.d;
+ const prof=`<div class="card" style="margin-bottom:14px"><div class="row sb"><b>My profiles</b><button class="btn alt sm" data-act="links">Edit links</button></div><div class="row" style="margin-top:10px"><a class="btn sm" target="_blank" rel="noopener" href="https://github.com/${esc(L.gh)}">GitHub ↗</a><a class="btn sm" target="_blank" rel="noopener" href="${esc(L.li)}">LinkedIn ↗</a><a class="btn sm" target="_blank" rel="noopener" href="${esc(L.pf)}">Portfolio ↗</a></div></div>`;
+ if(!d)return prof+`<div class="card"><b>GitHub progress (@${esc(L.gh)})</b><p class="mute">${GH.loading?'Loading your GitHub activity…':esc(GH.err||'Not loaded yet.')}</p><div class="row"><button class="btn" data-act="ghr">Load / retry</button><button class="btn alt" data-act="ghu">Change username</button></div></div>`;
+ const mx=Math.max(1,...d.week.map(x=>x[1])),lm=Math.max(1,...d.langs.map(x=>x[1]));
+ return prof+`<div class="card" style="margin-bottom:14px"><div class="row" style="gap:14px;flex-wrap:nowrap">${d.avatar?`<img src="${esc(d.avatar)}" alt="" width="56" height="56" style="border-radius:50%">`:''}<div style="flex:1;min-width:0"><b>${esc(d.name)}</b><div class="mute">@${esc(d.login)} · on GitHub since ${esc(d.since)}</div></div><button class="btn alt sm" data-act="ghr">↻ Refresh</button><button class="btn alt sm" data-act="ghu">User</button></div></div>
+ <div class="stats"><div class="card stat"><div class="ico">📦</div><span class="mute">Public repos</span><b>${d.repos}</b></div><div class="card stat"><div class="ico">⭐</div><span class="mute">Stars earned</span><b>${d.stars}</b></div><div class="card stat"><div class="ico">👥</div><span class="mute">Followers</span><b>${d.followers}</b></div><div class="card stat"><div class="ico">⌨</div><span class="mute">Commits, 30 days</span><b>${d.c30}</b></div><div class="card stat"><div class="ico">📅</div><span class="mute">Active days, 30 days</span><b>${d.act}</b></div><div class="card stat"><div class="ico">🔥</div><span class="mute">Commit streak</span><b>${d.streak} days</b></div></div>
+ <div class="card" style="margin-bottom:14px"><div class="row sb"><b>Monthly goal: 20 active days</b><span class="mute">${d.act}/20 · ${ghPct()}%</span></div><div class="bar" style="margin-top:8px"><i style="width:${ghPct()}%"></i></div></div>
+ <div class="card" style="margin-bottom:14px"><b>Commits, last 7 days</b><div class="wk" style="margin-top:12px">${d.week.map(x=>`<div><span>${x[1]||''}</span><i style="height:${Math.max(4,Math.round(x[1]/mx*64))}px"></i><span>${x[0]}</span></div>`).join('')}</div></div>
+ <div class="card" style="margin-bottom:14px"><b>Top languages</b>${d.langs.map(x=>`<div style="margin:10px 0"><div class="row sb"><span>${esc(x[0])}</span><span class="mute">${x[1]} repos</span></div><div class="bar"><i style="width:${Math.round(x[1]/lm*100)}%"></i></div></div>`).join('')||'<p class="mute">No languages found yet.</p>'}</div>
+ <div class="card"><b>Recently updated repos</b>${d.recent.map(x=>`<div class="doc"><div class="row sb"><a href="${esc(x.u)}" target="_blank" rel="noopener"><b>${esc(x.n)} ↗</b></a><span class="mute">${esc(x.p)}</span></div><div class="mute">${esc(x.l||'—')} · ⭐ ${x.s}</div></div>`).join('')||'<p class="mute">No repos yet.</p>'}</div>
+ <p class="mute" style="margin-top:12px">Counts come from your public GitHub activity (about the last 90 days) and refresh every 10 minutes.</p>`}
+setTimeout(()=>ghLoad(),0);
+let R={rx:-18,ry:18,drag:false,x:0,y:0};
+function scene3d(){
+ const box=(w,hh,d,x,y,z,c,fr,t)=>{const f=(k,st,inn)=>`<i class="${k}" style="${st}">${inn||''}</i>`;
+  return `<div class="bx ${c}" ${t?`data-t="${t}"`:''} style="transform:translate3d(${x}px,${y}px,${z}px)">`
+  +f('fr',`width:${w}px;height:${hh}px;left:${-w/2}px;top:${-hh/2}px;transform:translateZ(${d/2}px)`,fr)
+  +f('bk',`width:${w}px;height:${hh}px;left:${-w/2}px;top:${-hh/2}px;transform:rotateY(180deg) translateZ(${d/2}px)`)
+  +f('rt',`width:${d}px;height:${hh}px;left:${-d/2}px;top:${-hh/2}px;transform:rotateY(90deg) translateZ(${w/2}px)`)
+  +f('lf',`width:${d}px;height:${hh}px;left:${-d/2}px;top:${-hh/2}px;transform:rotateY(-90deg) translateZ(${w/2}px)`)
+  +f('tp',`width:${w}px;height:${d}px;left:${-w/2}px;top:${-d/2}px;transform:rotateX(90deg) translateZ(${hh/2}px)`)
+  +f('bt',`width:${w}px;height:${d}px;left:${-w/2}px;top:${-d/2}px;transform:rotateX(-90deg) translateZ(${hh/2}px)`)+'</div>'};
+ const row=(n,p)=>`<div>&gt; ${n} ${p}%</div><u><s style="width:${p}%"></s></u>`;
+ const screen=`<div class="scr"><b>VIXO.EXE</b>${row('skills',avg())}${row('leetcode',lcPct())}${row('videos',vPct())}<div>&gt; perf ${perf()}%<em>█</em></div></div>`;
+ const tower='<span class="pw"></span><span class="sl"></span><span class="sl"></span>';
+ const cube=(l,c,x,y,z,d)=>`<div class="fw" style="transform:translate3d(${x}px,${y}px,${z}px);animation-delay:${d}s"><div class="fc ${c}" style="animation-delay:${d}s"><i>${l}</i><i></i><i></i><i></i><i></i><i></i></div></div>`;
+ let legs='';[[-105,-55],[105,-55],[-105,55],[105,55]].forEach(a=>{legs+=box(8,40,8,a[0],28,a[1],'wd')});
+ return `<div class="rig"><div class="floor"></div>${legs}`
+  +box(230,8,130,0,4,0,'wd','','Desk')
+  +box(70,5,40,25,-2.5,-25,'cy')+box(16,30,10,25,-20,-25,'cy')
+  +box(150,100,10,25,-85,-25,'dk mon',screen,'Monitor · performance '+perf()+'%')
+  +box(44,100,66,-82,-50,-25,'dk',tower,'Tower · skills '+avg()+'%')
+  +box(110,6,34,25,-3,35,'kb','','Keyboard · LeetCode '+lcPct()+'%')
+  +box(14,6,22,102,-3,35,'pk','','Mouse · videos '+vPct()+'%')
+  +cube('PY','pk',-120,-170,-60,0)+cube('AI','cy',120,-185,30,-2)+cube('SQL','yl',10,-210,-100,-4)+`</div>`}
+(()=>{const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ const apply=()=>{const w=document.getElementById('world');if(w){w.style.setProperty('--rx',R.rx);w.style.setProperty('--ry',R.ry)}};
+ document.addEventListener('pointerdown',e=>{const s=e.target.closest&&e.target.closest('.scene');if(!s)return;R.drag=true;R.x=e.clientX;R.y=e.clientY;try{s.setPointerCapture(e.pointerId)}catch(_){}});
+ document.addEventListener('pointermove',e=>{if(!R.drag)return;R.ry+=(e.clientX-R.x)*.6;R.rx=Math.max(-80,Math.min(-5,R.rx-(e.clientY-R.y)*.4));R.x=e.clientX;R.y=e.clientY;apply()});
+ const end=()=>{R.drag=false};document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+ document.addEventListener('pointerover',e=>{const b=e.target.closest&&e.target.closest('.bx[data-t]'),t=document.getElementById('hint');if(b&&t)t.textContent='▣ '+b.dataset.t});
+ if(rm)setInterval(apply,300);else{const tick=()=>{if(!R.drag){R.ry+=Math.cos(R.t=(R.t||0)+.015)*.35;apply()}requestAnimationFrame(tick)};tick()}})();
+const TABS=[['dash','▦','Dashboard'],['skills','✎','My Skills'],['quizzes','📝','Quizzes'],['courses','🎓','Courses'],['meetups','🤝','Meetups'],['play','🎮','Play & Stories'],['github','🐙','GitHub'],['tasks','⏰','Reminders'],['lock','🔒','Locker']];
+function render(){
+ $('#tabs').innerHTML='<div class="logo"><b>VX</b><span>VIXO<small style="display:block;font:500 10.5px var(--f);color:var(--mute);letter-spacing:0">A Personalized workspace</small></span></div><div class="sep">MENU</div>'+TABS.map(([k,i,v])=>`<button class="nv" aria-selected="${k===tab}" data-tab="${k}"><span aria-hidden="true">${i}</span>${v}</button>`).join('')
+ +'<div class="sep">LINKS</div><a class="nv" target="_blank" rel="noopener" href="https://leetcode.com/problemset/"><span aria-hidden="true">⌨</span>LeetCode ↗</a><a class="nv" target="_blank" rel="noopener" href="'+esc(S.links.pf)+'"><span aria-hidden="true">◎</span>Portfolio ↗</a><a class="nv" target="_blank" rel="noopener" href="https://github.com/'+esc(S.links.gh)+'"><span aria-hidden="true">🐙</span>GitHub ↗</a><a class="nv" target="_blank" rel="noopener" href="'+esc(S.links.li)+'"><span aria-hidden="true">in</span>LinkedIn ↗</a><a class="nv" target="_blank" rel="noopener" href="https://luma.com/discover"><span aria-hidden="true">✦</span>Luma ↗</a><a class="nv" target="_blank" rel="noopener" href="https://www.meetup.com/home/"><span aria-hidden="true">👥</span>Meetup ↗</a>';
+ $('#ttl').textContent=TABS.find(t=>t[0]===tab)[2];
+ $('#toplinks').innerHTML=`<a class="btn alt sm" target="_blank" rel="noopener" href="${esc(S.links.gh?'https://github.com/'+S.links.gh:'https://github.com/')}">GitHub ↗</a><a class="btn alt sm" target="_blank" rel="noopener" href="${esc(S.links.li)}">LinkedIn ↗</a><a class="btn alt sm" target="_blank" rel="noopener" href="${esc(S.links.pf)}">Portfolio ↗</a>`;
+ $('#view').innerHTML=({dash,skills,quizzes,courses,meetups,play,github,tasks,lock})[tab]();
+}
+function course(s){return `<div class="card course"><span class="tag">${esc(s.g)}</span><h4>${esc(s.n)}</h4><div class="bar"><i style="width:${s.p}%"></i></div><div class="row sb" style="margin-top:12px"><b>${s.p}%</b><span class="row"><a class="btn alt sm" target="_blank" rel="noopener" href="${vids(s.n).ta}">▶ தமிழ்</a><a class="btn alt sm" target="_blank" rel="noopener" href="${vids(s.n).en}">▶ EN</a></span></div></div>`}
+function dash(){
+ const d=due(),next=[...S.skills].filter(s=>s.p<100&&s.g!=='Soft Skills').sort((a,b)=>b.p-a.p).slice(0,3);
+ return `<div class="hero"><div><p class="eyebrow">00 / HELLO · cursor 0.99</p><h2>VIXO<span class="ext">.EXE</span></h2><div class="tl">Learn faster. <em>Build better.</em></div><p>Welcome back, Vishnu — you’re ${avg()}% through the skills on your resume.</p><div class="row"><button class="btn ghost" data-tab="quizzes">Start daily quiz</button><button class="btn ghost" data-ask="Make me a focused plan for today and this week based on my skill progress, reminders and LeetCode streak.">Plan my week</button><a class="btn ghost" target="_blank" rel="noopener" href="https://leetcode.com/problems/random-one-question/all" style="background:rgba(255,255,255,.18);color:#fff">Random LeetCode</a></div></div><div class="scene" id="scene" aria-label="Draggable 3D computer"><div class="world" id="world">${scene3d()}</div><div class="hint" id="hint">↔ drag to rotate the computer · hover a part</div></div></div>
+ <div class="card" style="margin:18px 0 0"><div class="row sb"><h3 class="sec" style="margin:0">Performance</h3><b style="font-size:30px">${perf()}%</b></div><div class="bar" style="height:12px;margin:10px 0 14px"><i style="width:${perf()}%"></i></div>${perfRows().map(([n,p,w])=>`<div style="margin:10px 0"><div class="row sb"><span>${n} <span class="mute">· weight ${w}</span></span><b>${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}<div class="mute" style="margin:14px 0 8px">LeetCode problems, last 7 days</div><div class="wk">${week().map(([d,n])=>`<div><span>${n||''}</span><i style="height:${Math.min(64,Math.max(4,n*12))}px"></i><span>${d}</span></div>`).join('')}</div></div>
+ <div class="stats"><div class="card stat"><div class="ico">🎯</div><span class="mute">Skills started</span><b>${S.skills.filter(s=>s.p>0).length}/${S.skills.length}</b></div>
+ <div class="card stat"><div class="ico">🔥</div><span class="mute">LeetCode streak</span><b>${streak()} days</b></div>
+ <div class="card stat"><div class="ico">✅</div><span class="mute">Problems solved</span><b>${solved()}</b></div>
+ <div class="card stat"><div class="ico">⏰</div><span class="mute">Reminders due</span><b>${d.length}</b></div></div>
+ <h3 class="sec">Continue learning <button class="btn alt sm" data-tab="skills">All skills</button></h3><div class="cols">${next.map(course).join('')}</div>
+ <h3 class="sec">Recommended courses <button class="btn alt sm" data-tab="courses">All courses</button></h3><div class="cols">${recC(3,next.map(s=>s.n)).map(ccard).join('')}</div>
+ <h3 class="sec">Progress by track</h3><div class="card">${SK.map(([g])=>{const l=S.skills.filter(s=>s.g===g),m=mean(l);return `<div style="margin:10px 0"><div class="row sb"><b>${g}</b><span class="mute">${m}%</span></div><div class="bar ${m>=100?'ok':''}"><i style="width:${m}%"></i></div></div>`}).join('')}</div>
+ <h3 class="sec">LeetCode practice</h3><div class="card"><p style="margin-top:0" class="mute">Solve a problem, then log it to build your streak. Today: ${S.lc.days[today()]||0} solved.</p><div class="row sb"><b>${solved()}/${S.lc.goal}</b><span class="mute">${lcPct()}% of your goal</span></div><div class="bar" style="margin:6px 0 14px"><i style="width:${lcPct()}%"></i></div><div class="row"><a class="btn" target="_blank" rel="noopener" href="https://leetcode.com/problemset/">Open LeetCode</a><a class="btn alt" target="_blank" rel="noopener" href="https://leetcode.com/problems/random-one-question/all">Random problem</a><button class="btn alt" data-act="solved">+1 solved today</button><button class="btn alt" data-act="unsolve">−1</button><button class="btn alt" data-act="goal">Set goal</button></div></div>
+ <h3 class="sec">Due now</h3><div class="card">${d.length?d.map(t=>`<div>• <b>${esc(t.t)}</b> <span class="over">${t.due<today()?'overdue':'today'}</span></div>`).join(''):'<span class="mute">Nothing due. Add reminders in the Reminders tab.</span>'}</div>`;
+}
+function skills(){return `<div class="note">Your percentages are earned, not typed. Watch a video in Tamil or English, then take a quiz to raise the percentage.</div><div class="card" style="margin-bottom:6px"><div class="row sb"><b>Videos watched</b><span class="mute">${vDone()}/${S.skills.length*2} · ${vPct()}%</span></div><div class="bar" style="margin-top:8px"><i style="width:${vPct()}%"></i></div><p class="mute" style="margin:8px 0 0">Tap ☐ after you finish a Tamil or English video to track it.</p></div>`+SK.map(([g])=>{const l=S.skills.filter(s=>s.g===g);
+ return `<h3 class="sec" style="margin-top:18px">${g} <span class="mute">${mean(l)}%</span></h3><div class="card">${l.map(s=>{const v=vids(s.n);return `<div class="sk"><b>${esc(s.n)}</b><div class="bar"><i style="width:${s.p}%"></i></div><span class="pc">${s.p}%</span><span class="row"><a class="btn alt sm" target="_blank" rel="noopener" href="${v.ta}">▶ தமிழ்</a><a class="btn alt sm" target="_blank" rel="noopener" href="${v.en}">▶ English</a><button class="btn sm" data-q="p:${s.id}">Quiz</button><button class="btn alt sm" data-vw="${s.id}:ta">${(S.vw[s.id]||{}).ta?'✅':'☐'} Tamil</button><button class="btn alt sm" data-vw="${s.id}:en">${(S.vw[s.id]||{}).en?'✅':'☐'} English</button></span></div>`}).join('')}</div>`}).join('')}
+function tasks(){
+ const L=[...S.tasks].sort((a,b)=>(a.done-b.done)||(a.due||'9').localeCompare(b.due||'9'));
+ return `<form class="row" data-form="task"><input name="t" placeholder="Reminder (e.g. Finish FastAPI tutorial)" required style="flex:1;min-width:200px"><input type="date" name="due"><button class="btn">Add</button></form>
+ <div class="card" style="margin-top:14px">${L.map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" data-tk="${t.id}" ${t.done?'checked':''} aria-label="Done"><div><b>${esc(t.t)}</b><br><span class="mute ${!t.done&&t.due&&t.due<today()?'over':''}">${t.due||'no date'}</span></div><button class="btn red sm" data-del="tasks:${t.id}">Delete</button></div>`).join('')||'<span class="mute">No reminders yet.</span>'}</div>`;
+}
+function lock(){
+ return `<div class="note">🔒 Your documents stay in this browser (on this device) and are never uploaded anywhere. Clearing site data deletes them, and they don’t sync to other devices.</div>
+ <form class="card" data-form="doc" style="margin-bottom:16px"><div class="row"><input type="file" name="f" required><select name="c"><option>Marksheet</option><option>Certificate</option><option>ID</option><option>Resume</option><option>Other</option></select><input name="t" placeholder="Title (e.g. Semester 5 marksheet)" required style="flex:1;min-width:180px"></div>
+ <p><textarea name="n" placeholder="Notes the AI can use, e.g. marks, grade, year, issuer"></textarea></p><button class="btn">Save to locker</button> <span class="mute" id="up"></span></form>
+ <h3 class="sec" style="margin-top:6px">Documents</h3><div class="card">${S.docs.map(d=>`<div class="doc"><div><b>${esc(d.t)}</b> <span class="tag">${esc(d.c)}</span></div>${d.n?`<div class="mute">${esc(d.n)}</div>`:''}<div class="row"><button class="btn sm" data-open="${d.id}">Open</button><button class="btn red sm" data-del="docs:${d.id}">Delete</button></div></div>`).join('')||'<span class="mute">Locker is empty.</span>'}</div>`;
+}
+document.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-mf],[data-mr],[data-q],[data-ans],[data-cf],[data-cs],[data-tab],[data-act],[data-del],[data-ask],[data-open],[data-vw],[data-pf],[data-pp]');if(!b)return;
+ if(b.dataset.mf){mf=b.dataset.mf;render()}
+ else if(b.dataset.vw){const[i,l]=b.dataset.vw.split(':');S.vw[i]=S.vw[i]||{};S.vw[i][l]=!S.vw[i][l];save();render()}
+ else if(b.dataset.pf){pf=b.dataset.pf;render()}
+ else if(b.dataset.pp){S.pl[b.dataset.pp]=!S.pl[b.dataset.pp];save();render()}
+ else if(b.dataset.mr){const m=MT.find(x=>x[0]===b.dataset.mr),d=new Date();d.setDate(d.getDate()+7);S.tasks.push({id:uid(),t:'Check '+m[1]+' for upcoming meetups',due:d.toLocaleDateString('en-CA'),done:false});save();b.textContent='Reminder added ✓';b.disabled=true}
+ else if(b.dataset.ans!==undefined){Q.a=+b.dataset.ans;Q.res[Q.i]=Q.a===Q.list[Q.i][3];render()}
+ else if(b.dataset.q){const k=b.dataset.q;if(k==='next'){Q.a=null;Q.i++;if(Q.i>=Q.list.length)finishQ();render()}else if(k==='end'){Q=null;render()}else startQ(k)}
+ else if(b.dataset.cf){cf=b.dataset.cf;render()}
+ else if(b.dataset.cs){const i=b.dataset.cs;S.cs[i]=((S.cs[i]||0)+1)%3;save();render()}
+ else if(b.dataset.tab){tab=b.dataset.tab;render()}
+ else if(b.dataset.act==='solved'){S.lc.days[today()]=(S.lc.days[today()]||0)+1;save();render()}
+ else if(b.dataset.act==='unsolve'){if(S.lc.days[today()]>0){S.lc.days[today()]--;save();render()}}
+ else if(b.dataset.act==='goal'){const v=parseInt(prompt('How many LeetCode problems is your goal?',S.lc.goal),10);if(v>0){S.lc.goal=v;save();render()}}
+ else if(b.dataset.act==='links'){const L=S.links,g=prompt('GitHub username',L.gh);if(g===null)return;const li=prompt('LinkedIn profile URL',L.li);if(li===null)return;const pf=prompt('Portfolio URL',L.pf);if(pf===null)return;
+  const ok=x=>/^https:\/\//.test(x.trim());if(/^[A-Za-z0-9-]+$/.test(g.trim()))L.gh=g.trim();if(ok(li))L.li=li.trim();if(ok(pf))L.pf=pf.trim();save();GH.d=null;render();ghLoad(true)}
+ else if(b.dataset.act==='ghr'){ghLoad(true)}
+ else if(b.dataset.act==='ghu'){const g=prompt('GitHub username',S.links.gh);if(g&&/^[A-Za-z0-9-]+$/.test(g.trim())){S.links.gh=g.trim();save();GH.d=null;ghLoad(true)}}
+ else if(b.dataset.ask){openChat();send(b.dataset.ask)}
+ else if(b.dataset.open){openDoc(b.dataset.open)}
+ else if(b.dataset.del){const[k,id]=b.dataset.del.split(':');
+  if(k==='docs'){const d=S.docs.find(x=>x.id===id);if(!confirm('Delete this document permanently?'))return;try{await idb('del',id)}catch(_){}}
+  S[k]=S[k].filter(x=>x.id!==id);save();render()}
+});
+document.addEventListener('change',e=>{const id=e.target.dataset.tk;if(!id)return;S.tasks.find(x=>x.id===id).done=e.target.checked;save();render()});
+document.addEventListener('submit',async e=>{
+ const f=e.target.dataset.form;if(!f)return;e.preventDefault();const v=new FormData(e.target);
+ if(f==='task'){S.tasks.push({id:uid(),t:v.get('t'),due:v.get('due'),done:false})}
+ if(f==='doc'){$('#up').textContent='Uploading…';
+  try{const file=v.get('f'),id=uid();await idb('put',id,file);S.docs.push({id,t:v.get('t'),c:v.get('c'),n:v.get('n'),name:file.name,type:file.type})}
+  catch(err){$('#up').textContent='Could not save the file in this browser.';return}}
+ save();render();
+});
+/* ---------- file storage (IndexedDB) ---------- */
+const idbOpen=()=>new Promise((res,rej)=>{const r=indexedDB.open('vp_locker',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function idb(op,id,val){const db=await idbOpen();return new Promise((res,rej)=>{const s=db.transaction('f',op==='get'?'readonly':'readwrite').objectStore('f');
+ const q=op==='put'?s.put(val,id):op==='get'?s.get(id):s.delete(id);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
+async function openDoc(id){try{const f=await idb('get',id);if(!f){alert('This file is not in this browser’s storage.');return}window.open(URL.createObjectURL(f),'_blank')}catch(e){alert('Could not open the file.')}}
+
+/* ---------- AI assistant ---------- */
+const MODEL='claude-sonnet-5-5';
+const key=()=>{try{return localStorage.getItem('vp_key')||''}catch(e){return''}};
+function openChat(){$('#side').classList.add('open')}
+$('#fab').onclick=openChat;$('#close').onclick=()=>$('#side').classList.remove('open');
+function bubble(cls,txt){const d=document.createElement('div');d.className='m '+cls;d.textContent=txt;$('#log').appendChild(d);$('#log').scrollTop=1e9;return d}
+function card(el,d){const b=document.createElement('button');b.className='dl';b.textContent='Open '+d.t;b.onclick=()=>openDoc(d.id);el.appendChild(document.createElement('br'));el.appendChild(b)}
+const SKIP=['show','what','give','open','please','tell','about','mine','document','documents','that','this','with','have','need'];
+function findDocs(q){const l=q.toLowerCase(),w=l.match(/[a-z0-9]{4,}/g)||[];
+ return S.docs.filter(d=>{const h=(d.t+' '+d.c+' '+d.n).toLowerCase();
+  return (/mark|result|grade/.test(l)&&/marksheet/i.test(d.c))||(/certificate/.test(l)&&/certificate/i.test(d.c))||(/resume|\bcv\b/.test(l)&&/resume/i.test(d.c))||(/\b(id|aadhaar|passport)\b/.test(l)&&/^id$/i.test(d.c))||w.some(x=>!SKIP.includes(x)&&h.includes(x))})}
+const nextSk=()=>[...S.skills].filter(s=>s.g!=='Soft Skills'&&s.p<100).sort((a,b)=>b.p-a.p).slice(0,3);
+const ALIAS={javascript:'JavaScript',' js':'JavaScript','full stack':'Full-Stack Development',fullstack:'Full-Stack Development','data analysis':'Data Analysis',pandas:'Data Analysis',mcp:'MCP',python:'Python',sql:'SQL',fastapi:'FastAPI',django:'Django',html:'HTML',css:'CSS',automation:'Automation'};
+const skillIn=l=>{for(const k of Object.keys(ALIAS))if(l.includes(k))return ALIAS[k];return /(^|\s)c(\s|$|\?)|c programming/.test(l)?'C':null};
+function local(q){const l=q.toLowerCase(),docs=findDocs(q),n=nextSk(),P=[],sk=skillIn(l);
+ if(docs.length)P.push('Here’s what I found in your locker:'+docs.map(d=>`\n• ${d.t} (${d.c})${d.n?' — '+d.n:''}`).join(''));
+ if(/percent|%|progress|status|how am i|how far|level/.test(l)){const one=sk&&S.skills.find(s=>s.n===sk),top=[...S.skills].filter(s=>s.p>0).sort((a,b)=>b.p-a.p).slice(0,3);
+  P.push(one?`${one.n}: ${one.p}%. Overall: ${avg()}%.`:`Overall ${avg()}% across ${S.skills.length} resume skills. ${top.length?'Strongest: '+top.map(s=>s.n+' '+s.p+'%').join(', ')+'.':'Nothing earned yet. Take a quiz to start.'}`);
+  P.push(`Performance: ${perf()}%. LeetCode: ${solved()}/${S.lc.goal} solved (${lcPct()}%), ${streak()}-day streak. Videos watched: ${vDone()}/${S.skills.length*2}. Reminders due: ${due().length}.`)}
+ if(/video|youtube|watch|tamil|english|tutorial/.test(l)){const nm=sk||(n[0]&&n[0].n)||'Python',v=vids(nm),ta=/tamil/.test(l),en=/english/.test(l);
+  P.push(`${nm} videos:`+(en&&!ta?'':'\nTamil: '+v.ta)+(ta&&!en?'':'\nEnglish: '+v.en))}
+ if(/quiz|test me|practice/.test(l))P.push(`Daily quiz: ${S.q.d===today()?'done ('+S.q.ds+'/5)':'available'}. Weekly quiz: ${S.q.w===wk()?'done ('+S.q.ws+'/12)':'available'}. Open the Quizzes tab to raise your percentages.`);
+ if(/github|commit|repo/.test(l))P.push(GH.d?`GitHub (@${GH.d.login}): ${GH.d.repos} repos, ${GH.d.act} active days and ${GH.d.c30} commits in the last 30 days, ${GH.d.streak}-day streak.`:'GitHub data isn’t loaded yet. Open the GitHub tab.');
+ if(/game|play|story|gamif/.test(l))P.push('Learn by playing (open the Play & Stories tab for all of them):\n'+PL.slice(0,22).filter((x,i)=>i%3===0).map(x=>`• ${x[1]} (${PLN[x[2]]}) — ${x[4]}`).join('\n'));
+ if(/meetup|luma|event|community/.test(l))P.push('Tech meetups around Chennai:\n'+MT.slice(0,6).map(m=>`• ${m[1]} (${m[2]}) — ${m[4]}`).join('\n')+'\n\nOpen the Meetups tab for the full list.');
+ if(!P.length){
+  if(/plan|schedule|week|today/.test(l))P.push(`Plan:\n1) ${n[0]?n[0].n+' — watch a video, then take its quiz':'Pick a skill to start'}\n2) Daily quiz\n3) LeetCode — 1 to 2 problems, then log them\n4) ${due().length?'Clear '+due().length+' due reminder(s)':'Add a reminder for tomorrow'}`);
+  else if(/learn|next|study|recommend|course/.test(l))P.push((n.length?'Focus next on:\n'+n.map(s=>`• ${s.n} (${s.p}%)`).join('\n'):'Every skill is at 100%.')+'\n\nCourses to try:\n'+recC(3,n.map(s=>s.n)).map(c=>`• ${c[1]} — ${c[5]}`).join('\n'));
+  else if(/leetcode|streak|solved/.test(l))P.push(`LeetCode: ${solved()} solved, ${streak()}-day streak, ${S.lc.days[today()]||0} today.`);
+  else if(/remind|due|task/.test(l))P.push(due().length?'Due now:\n'+due().map(x=>'• '+x.t).join('\n'):`Nothing due. ${S.tasks.filter(x=>!x.done).length} open reminders in total.`);
+  else P.push('Try: “what is my current percentage”, “give me a Python video in Tamil”, “plan my week”, “what should I learn next”, or “show my marksheet”.')}
+ return{t:P.join('\n\n'),docs}}
+async function claude(q,k){
+ const ctx=JSON.stringify({today:today(),resumeSkillProgress:S.skills.map(t=>({skill:t.n,group:t.g,percent:t.p})),leetcode:{solved:solved(),streakDays:streak(),solvedToday:S.lc.days[today()]||0},reminders:S.tasks.filter(t=>!t.done).map(t=>({task:t.t,due:t.due})),documents:S.docs.map(d=>({title:d.t,category:d.c,notes:d.n})),quizzes:{dailyDone:S.q.d===today(),dailyScore:S.q.ds,weeklyDone:S.q.w===wk()},videos:Object.fromEntries(S.skills.map(s=>[s.n,{tamil:vids(s.n).ta,english:vids(s.n).en}])),meetups:MT.map(m=>m[1]+' ['+m[2]+', '+m[3]+']: '+m[4]),courses:{learning:CO.filter(c=>S.cs[c[0]]===1).map(c=>c[1]),done:CO.filter(c=>S.cs[c[0]]===2).map(c=>c[1]),catalog:CO.map(c=>c[1]+' ['+c[4]+']')}});
+ const system=`You are the personal trainer and assistant inside Vishnu’s workspace. He is a final-year CSE student aiming for software engineering roles in Python, AI and backend. Answer briefly and concretely using only this data: ${ctx}. The skills tracked are exactly the ones on his resume. For progress questions, quote the real numbers and suggest a next step. For plans, give a short prioritized list. State marks only if they appear in document notes; otherwise say the notes don’t include them. When asked for his percentage, give the overall percent and the relevant skill percents, and say percentages rise only through the daily, weekly and practice quizzes. When asked for a video, give both the Tamil and English YouTube links from the videos data for the skill he names (or his lowest skill if none), as plain URLs. Never invent data.`;
+ const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+  body:JSON.stringify({model:MODEL,max_tokens:700,system,messages:[...hist.slice(-8),{role:'user',content:q}]})});
+ if(!r.ok)throw new Error(r.status);const j=await r.json();return j.content.filter(c=>c.type==='text').map(c=>c.text).join('')}
+async function send(q){
+ bubble('u',q);const el=bubble('b','Thinking…');let docs=findDocs(q),text=null;const k=key();
+ if(k){try{text=await claude(q,k)}catch(e){}}
+ if(!text){const r=local(q);text=r.t+(k?'\n\n(Claude couldn’t be reached, so this is a built-in answer.)':'');docs=r.docs.length?r.docs:docs}
+ el.textContent=text;docs.forEach(d=>card(el,d));$('#log').scrollTop=1e9;hist.push({role:'user',content:q},{role:'assistant',content:text});
+}
+function setKey(){const v=prompt('Optional: paste your Anthropic API key to get full Claude replies. It is saved only in this browser. Leave empty to remove it.',key());if(v===null)return;
+ try{v.trim()?localStorage.setItem('vp_key',v.trim()):localStorage.removeItem('vp_key')}catch(e){}bubble('b',v.trim()?'Claude replies are on.':'Back to built-in answers.')}
+$('#f').onsubmit=e=>{e.preventDefault();const q=$('#q').value.trim();if(!q)return;$('#q').value='';send(q)};
+$('#chips').innerHTML=['What’s my progress?','Show my marksheet','Plan my week','What should I learn next?'].map(t=>`<button type="button">${t}</button>`).join('')+'<button type="button" data-k="1">⚙ Claude key</button>';
+$('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;b.dataset.k?setKey():send(b.textContent)};
+bubble('b','Hi Vishnu! Welcome to VIXO. I can track your resume skills, plan your week and fetch documents from your locker. Ask me anything.');
+render();
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
+ document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;
+  const h=e.target.closest('.hero');if(h){const r=h.getBoundingClientRect(),s=h.querySelector('.stage');if(s){s.style.setProperty('--ry',((e.clientX-r.left)/r.width-.5)*34+'deg');s.style.setProperty('--rx',(.5-(e.clientY-r.top)/r.height)*24+'deg')}}
+  const c=e.target.closest('.cols .card,.stats .card');if(!c)return;const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+  c.style.setProperty('--ry',(x-.5)*14+'deg');c.style.setProperty('--rx',(.5-y)*14+'deg');c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%')});
+ document.addEventListener('pointerout',e=>{const c=e.target.closest('.cols .card,.stats .card');
+  if(c&&!c.contains(e.relatedTarget)){c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')}
+  const h=e.target.closest('.hero');if(h&&!h.contains(e.relatedTarget)){const s=h.querySelector('.stage');if(s){s.style.setProperty('--rx','0deg');s.style.setProperty('--ry','0deg')}}});
+}
+{const v=$('#bg');if(v){v.muted=true;v.defaultMuted=true;v.setAttribute('playsinline','');
+ if(matchMedia('(prefers-reduced-motion:reduce)').matches)v.pause();
+ else{const go=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{})};go();v.addEventListener('canplay',go,{once:true});
+  ['pointerdown','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,()=>{if(v.paused)go()},{passive:true}))}}}
+</script>
+
+<!-- ===== VIXO UPDATE: soft colours, alignment, charts, aptitude and logic ===== -->
 <style>
 /* ---- softer palette ---- */
 html:root:root{--bg:#14111d;--card:#1b1727;--ink:#f3f0fa;--mute:#b3aac8;--pri:#c99bd8;--pri2:rgba(201,155,216,.14);--ok:#8fd3b0;--warn:#e8a37a;--line:rgba(255,255,255,.12);--pk:#c99bd8;--yl:#e6cf8f;--cy:#8cc7d4}
@@ -62,6 +711,7 @@ h3.sec{align-items:center}
 .empty{padding:18px 0;text-align:center}
 </style>
 <script>
+window.addEventListener('load',()=>{
 /* ---- 1. aptitude + logic skills and questions ---- */
 SK.push(['Aptitude & Logic',[['Quantitative Aptitude','https://www.indiabix.com/aptitude/questions-and-answers/'],['Logical Reasoning','https://www.indiabix.com/logical-reasoning/questions-and-answers/']]]);
 SK[SK.length-1][1].forEach(([n,u])=>{if(!S.skills.some(s=>s.n===n))S.skills.push({id:uid(),n,g:'Aptitude & Logic',u,p:0})});
@@ -155,5 +805,7 @@ function analysis(){
  <div class="card wide"><b>All skills</b>${bars(sorted.map(s=>[s.n,s.p]))}</div>
  </div>`}
 render();
+});
 </script>
-<!-- ===== end of VIXO UPDATE ===== -->
+</body>
+</html>
