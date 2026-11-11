@@ -849,5 +849,504 @@ body.chat-open #ov{opacity:1;pointer-events:auto}
  ).observe(side,{attributes:true,attributeFilter:['class']});
 })();
 </script>
+
+<!-- ===== VIXO UPDATE v2: scroll sidebar, bright theme, daily reminders, clock, scroll effects, smart AI, analysis, rewards, certifications, events ===== -->
+<script>
+(function () {
+'use strict';
+function boot() {
+if (typeof S === 'undefined' || typeof render !== 'function' || window.__vixoUpd) return;
+window.__vixoUpd = 1;
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const ymd = d => d.toLocaleDateString('en-CA');
+const pad = n => String(n).padStart(2, '0');
+const hms = s => pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s % 3600 / 60)) + ':' + pad(s % 60);
+
+/* ------------------------------------------------------------------ CSS */
+const css = document.createElement('style');
+css.textContent = `
+html{scroll-behavior:smooth}
+/* brighter palette */
+html:root:root{--bg:#241d3d;--card:#2f2750;--ink:#ffffff;--mute:#d6cdee;--pri:#e3b6ff;--pri2:rgba(227,182,255,.2);--ok:#9cf0c4;--warn:#ffb98a;--line:rgba(255,255,255,.2);--pk:#e3b6ff;--yl:#ffe9a8;--cy:#9ee6f5}
+body{background:radial-gradient(900px 520px at 85% -8%,rgba(227,182,255,.3),transparent 62%),radial-gradient(700px 480px at -5% 45%,rgba(158,230,245,.14),transparent 60%),var(--bg)}
+#bg{filter:brightness(1.3) saturate(1.15);will-change:transform}
+.bgo{background:radial-gradient(900px 520px at 85% -8%,rgba(227,182,255,.22),transparent 62%),linear-gradient(rgba(158,230,245,.06) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,rgba(158,230,245,.06) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,rgba(36,29,61,.5),rgba(36,29,61,.12))}
+nav.side{background:rgba(36,29,61,.72)}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),rgba(47,39,80,.72)}
+.hero{background:rgba(36,29,61,.5);border-color:rgba(227,182,255,.7)}
+.note{background:rgba(255,233,168,.12)}
+input,select,textarea{background:rgba(36,29,61,.6)}
+aside#side{background:#2a2346}
+@media (max-width:1180px){aside{background:#2a2346}}
+/* bright (light) mode */
+html[data-bright="1"]:root:root{color-scheme:light;--bg:#f6f2ff;--card:#ffffff;--ink:#241c3d;--mute:#6b6090;--line:rgba(36,28,61,.15);--pri:#7a3fd1;--pri2:rgba(122,63,209,.12);--pk:#7a3fd1;--yl:#b7791f;--cy:#0b7f98;--ok:#0f9d6a;--warn:#d9632b}
+html[data-bright="1"] body{background:radial-gradient(900px 520px at 85% -8%,rgba(122,63,209,.14),transparent 62%),var(--bg)}
+html[data-bright="1"] #bg{opacity:.16;filter:none}
+html[data-bright="1"] .bgo{background:linear-gradient(rgba(122,63,209,.05) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,rgba(122,63,209,.05) 1px,transparent 1px) 0 0/44px 44px}
+html[data-bright="1"] nav.side,html[data-bright="1"] aside#side{background:rgba(255,255,255,.92)}
+html[data-bright="1"] .card{background:#fff}
+html[data-bright="1"] .hero{background:#fff;box-shadow:6px 6px 0 rgba(11,127,152,.25)}
+html[data-bright="1"] .top h1,html[data-bright="1"] .top .mute,html[data-bright="1"] .brand{text-shadow:none}
+html[data-bright="1"] .btn{background:#7a3fd1;color:#fff;border-color:transparent;box-shadow:3px 3px 0 rgba(122,63,209,.3)}
+html[data-bright="1"] .btn.alt{background:#fff;color:#7a3fd1;border:1px solid rgba(122,63,209,.45);box-shadow:none}
+html[data-bright="1"] .btn.ghost{background:#fff;color:#7a3fd1;border:1px solid rgba(122,63,209,.45)}
+html[data-bright="1"] .nv[aria-selected=true]{background:#7a3fd1;color:#fff;box-shadow:3px 3px 0 rgba(122,63,209,.3)}
+html[data-bright="1"] .nv:hover{background:rgba(122,63,209,.08)}
+html[data-bright="1"] input,html[data-bright="1"] select,html[data-bright="1"] textarea{background:#fff;color:#241c3d}
+html[data-bright="1"] .tag{background:#7a3fd1;color:#fff}
+html[data-bright="1"] .m.u{background:#7a3fd1;color:#fff}
+html[data-bright="1"] .m.b{background:#f1ebff;color:#241c3d}
+html[data-bright="1"] .m .dl{background:#7a3fd1;color:#fff}
+html[data-bright="1"] .m .acts a.dl{color:#fff}
+html[data-bright="1"] .logo b{color:#fff}
+html[data-bright="1"] .av{color:#fff}
+html[data-bright="1"] .hero h2 .ext{color:#b7791f}
+html[data-bright="1"] .scr{color:#7cf0ff}
+html[data-bright="1"] .opt.right{color:#06210f}
+html[data-bright="1"] .opt.wrong{color:#2a0f0f}
+html[data-bright="1"] #ov{background:rgba(36,28,61,.35)}
+/* sidebar scrolls */
+nav.side{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(227,182,255,.5) transparent;-webkit-overflow-scrolling:touch}
+nav.side::-webkit-scrollbar{width:6px}nav.side::-webkit-scrollbar-thumb{background:rgba(227,182,255,.5);border-radius:6px}
+nav.side .nv{flex:none}
+@media (max-width:760px){nav.side{overflow-x:auto;overflow-y:hidden}}
+/* AI drawer alignment */
+aside#side{padding:0}
+.ahead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 6px}
+.ahead h2{margin:0;padding:0;line-height:1.1;font-size:18px;text-align:left}
+aside#side>p.mute{padding:0 20px 12px!important;margin:0!important;text-align:left;font-size:13px}
+aside#side #log{display:flex;flex-direction:column;align-content:normal;gap:10px;padding:12px 20px}
+aside#side #log .m{width:auto;max-width:90%;text-align:left;line-height:1.55;font-size:13px}
+aside#side #log .m.u{align-self:flex-end}aside#side #log .m.b{align-self:flex-start}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:8px 20px;justify-content:flex-start}
+.chips button{min-height:30px;line-height:1.2}
+aside#side #f{display:flex;align-items:stretch;gap:10px;padding:12px 20px calc(16px + env(safe-area-inset-bottom,0px))}
+aside#side #f input{height:44px;margin:0}
+aside#side #f .btn{height:44px;padding:0 18px}
+#fab{min-height:44px;padding:0 18px;line-height:1}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.m .acts .dl{margin:0;display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;text-decoration:none;color:#241c3d;background:var(--pk);border-radius:4px;border:0;cursor:pointer;font:700 12.5px var(--f)}
+.m .acts a.dl{color:#241c3d;text-decoration:none}
+/* clock */
+#clk{margin:2px 0 6px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12.5px}
+#clk b{color:var(--yl);font-family:var(--f);font-variant-numeric:tabular-nums}
+#thm{min-height:30px;padding:2px 10px;font-size:12px}
+/* scroll effects (bitwip-style) */
+#spb{position:fixed;left:0;top:0;height:3px;width:100%;z-index:80;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--cy),var(--pk),var(--yl))}
+#view .rv{opacity:0;translate:0 38px;transition:opacity .75s cubic-bezier(.2,.7,.2,1) var(--d,0ms),translate .75s cubic-bezier(.2,.7,.2,1) var(--d,0ms),transform .18s ease-out,box-shadow .2s}
+#view .rv.in{opacity:1;translate:0 0}
+#view{counter-reset:sc}
+#view h3.sec::before{counter-increment:sc;content:counter(sc,decimal-leading-zero) " / ";color:var(--pk);font-family:var(--f);font-size:.62em;letter-spacing:.12em;margin-right:8px}
+#view h3.sec{border-bottom:1px solid var(--line);padding-bottom:8px}
+.mq2{overflow:hidden;white-space:nowrap;margin:18px 0 4px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.mq2 div{display:inline-block;animation:mq2 36s linear infinite}
+.mq2 span{margin:0 22px;font:700 13px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.mq2 span::after{content:"✳";margin-left:44px;color:var(--pk)}
+@media (prefers-reduced-motion:reduce){#view .rv{opacity:1;translate:none;transition:none}.mq2 div{animation:none}html{scroll-behavior:auto}}
+/* reminders */
+label.rep{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)}
+/* rewards */
+.rwhero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.lvl{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;text-align:center;background:conic-gradient(var(--pk) calc(var(--p)*1%),rgba(255,255,255,.12) 0);position:relative}
+.lvl::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--card)}
+.lvl b{position:relative;z-index:1;font:400 26px var(--d);line-height:1}.lvl small{position:relative;z-index:1;display:block;font-size:10px;color:var(--mute);letter-spacing:.1em}
+.qrow{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.qrow:last-child{border:0}
+.qrow .qi{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;background:var(--pri2);font-size:18px}
+.qrow .bar{grid-column:2/3;height:8px}
+.qrow .pr{font-size:12px;color:var(--mute);grid-column:2/3}
+.qrow .qa{grid-column:3;grid-row:1/4;align-self:center;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.xp{font:700 11px var(--f);color:#241c3d;background:var(--yl);border-radius:3px;padding:2px 8px}
+.bdg{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.bdg>div{text-align:center;padding:14px 8px;border:1px dashed var(--line);border-radius:6px;font-size:12px}
+.bdg>div b{display:block;font-size:26px;margin-bottom:4px}
+.bdg .off{opacity:.38;filter:grayscale(1)}
+.bdg .on{border:1px solid var(--yl);background:rgba(255,233,168,.1)}
+.cf{position:fixed;width:8px;height:8px;z-index:90;pointer-events:none;animation:cf .85s ease-out forwards}
+@keyframes cf{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+@keyframes ringin{from{stroke-dashoffset:314.16}}
+.strip{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin:18px 0 0}
+/* analysis */
+.anh{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+.ring{display:block}.ring .rt{font:400 28px var(--d);fill:var(--ink)}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:5px;max-width:260px}
+.hc{display:block;width:100%;aspect-ratio:1;border-radius:3px;background:rgba(255,255,255,.08)}
+.hc.l1{background:rgba(158,230,245,.35)}.hc.l2{background:rgba(158,230,245,.6)}.hc.l3{background:var(--pk)}.hc.l4{background:var(--yl)}.hc.lf{opacity:.25}
+.wkb{height:120px}.wkb .tdy i{background:linear-gradient(180deg,var(--cy),var(--pk))}
+.lb{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;margin:10px 0}
+.lb .bar{height:8px}
+@media (max-width:760px){.rwhero,.anh{grid-template-columns:1fr;justify-items:start}.qrow{grid-template-columns:32px minmax(0,1fr)}.qrow .qa{grid-column:1/-1;grid-row:auto;flex-direction:row;align-items:center;justify-content:space-between}}
+`;
+document.head.appendChild(css);
+
+/* ------------------------------------------------------ state + helpers */
+S.rw = Object.assign({ xp: 0, dc: {}, wc: {}, vid: {}, days: {}, sec: 0, seed: 0, theme: 0 }, S.rw || {});
+['dc', 'wc', 'vid', 'days'].forEach(k => S.rw[k] = S.rw[k] || {});
+S.ce = S.ce || {}; S.li = S.li || { n: 0, t: '' }; S.q.h = S.q.h || []; S.q.cat = S.q.cat || {};
+S.rw.days[today()] = 1;
+if (!S.rw.seed) {
+  ['Solve 1–2 LeetCode problems', 'Take the daily quiz', 'Watch one skill video', 'Check LinkedIn requests', 'Check Meetup & Luma events']
+    .forEach(t => S.tasks.push({ id: uid(), t, due: today(), done: false, rep: true, rd: '' }));
+  S.rw.seed = 1;
+}
+function rollDaily() {
+  const t = today(); let ch = false;
+  S.tasks.forEach(x => { if (x.rep && x.rd !== t) { x.done = false; x.due = t; x.rd = t; ch = true; } });
+  if (ch) save();
+}
+rollDaily(); save();
+const applyTheme = () => { if (S.rw.theme) document.documentElement.setAttribute('data-bright', '1'); else document.documentElement.removeAttribute('data-bright'); };
+applyTheme();
+
+const ins = (after, row) => { if (TABS.some(x => x[0] === row[0])) return; const i = TABS.findIndex(x => x[0] === after); TABS.splice(i + 1, 0, row); };
+ins('quizzes', ['rewards', '🏆', 'Rewards']);
+ins('courses', ['certs', '📜', 'Certifications']);
+ins('meetups', ['events', '📅', 'Events & Alerts']);
+
+function weekDates() {
+  const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return [...Array(7)].map((_, i) => { const x = new Date(d); x.setDate(d.getDate() + i); return ymd(x); });
+}
+const wkKey = () => weekDates()[0];
+const lvl = () => Math.floor(S.rw.xp / 150) + 1;
+const TITLES = ['Rookie', 'Coder', 'Builder', 'Hacker', 'Engineer', 'Architect', 'Legend'];
+const rank = () => TITLES[Math.min(TITLES.length - 1, lvl() - 1)];
+const totalVid = () => Object.values(S.rw.vid).reduce((a, b) => a + b, 0);
+function loginStreak() { let n = 0, d = new Date(); while (S.rw.days[ymd(d)]) { n++; d.setDate(d.getDate() - 1); } return n; }
+const bagD = () => (S.rw.dc[today()] = S.rw.dc[today()] || {});
+const bagW = () => (S.rw.wc[wkKey()] = S.rw.wc[wkKey()] || {});
+
+function withChest(list, bag, name, xp) {
+  list.forEach(q => q.claimed = !!bag[q.id]);
+  list.push({ id: 'chest', i: '🎁', n: name, xp, v: list.filter(q => q.claimed).length, g: list.length, claimed: !!bag.chest, nogo: 1 });
+  return list;
+}
+function dq() {
+  const t = today(), reps = S.tasks.filter(x => x.rep);
+  return withChest([
+    { id: 'login', i: '👋', n: 'Open VIXO today', xp: 10, v: 1, g: 1, nogo: 1 },
+    { id: 'quiz', i: '📝', n: 'Take the daily quiz', xp: 20, v: S.q.d === t ? 1 : 0, g: 1, go: 'quizzes' },
+    { id: 'apt', i: '🧮', n: 'Aptitude & logic round', xp: 20, v: S.q.a === t ? 1 : 0, g: 1, go: 'quizzes' },
+    { id: 'lc', i: '⌨', n: 'Solve 2 LeetCode problems', xp: 30, v: Math.min(2, S.lc.days[t] || 0), g: 2, url: 'https://leetcode.com/problemset/' },
+    { id: 'vid', i: '🎬', n: 'Watch a learning video', xp: 15, v: Math.min(1, S.rw.vid[t] || 0), g: 1, go: 'skills' },
+    { id: 'hab', i: '↻', n: 'Finish all daily reminders', xp: 25, v: reps.filter(x => x.done).length, g: Math.max(1, reps.length), go: 'tasks' }
+  ], bagD(), 'Daily chest · claim every quest', 30);
+}
+function wq() {
+  const wd = weekDates(), lcw = wd.reduce((a, d) => a + (S.lc.days[d] || 0), 0),
+    act = wd.filter(d => (S.lc.days[d] || 0) > 0 || S.q.h.some(h => h.d === d)).length,
+    vw = wd.reduce((a, d) => a + (S.rw.vid[d] || 0), 0), gh = (typeof GH !== 'undefined' && GH.d) ? GH.d.week.filter(x => x[1] > 0).length : 0;
+  return withChest([
+    { id: 'wq', i: '🗓', n: 'Take the weekly quiz', xp: 50, v: S.q.w === wk() ? 1 : 0, g: 1, go: 'quizzes' },
+    { id: 'wlc', i: '⌨', n: 'Solve 10 LeetCode problems this week', xp: 60, v: Math.min(10, lcw), g: 10, url: 'https://leetcode.com/problemset/' },
+    { id: 'wact', i: '🔥', n: 'Be active 5 days this week', xp: 60, v: Math.min(5, act), g: 5, go: 'quizzes' },
+    { id: 'wvid', i: '🎬', n: 'Watch 5 videos this week', xp: 40, v: Math.min(5, vw), g: 5, go: 'skills' },
+    { id: 'wgh', i: '🐙', n: 'Commit on 3 of the last 7 days', xp: 40, v: Math.min(3, gh), g: 3, go: 'github' }
+  ], bagW(), 'Weekly chest · claim every quest', 100);
+}
+const BG = [
+  ['🧠', 'First quiz', () => S.q.h.length > 0], ['💯', 'Perfect score', () => S.q.h.some(h => h.n > 0 && h.c === h.n)],
+  ['🔥', '3-day streak', () => streak() >= 3], ['⚡', '7-day streak', () => streak() >= 7], ['🏔', '30-day streak', () => streak() >= 30],
+  ['⌨', '50 problems', () => solved() >= 50], ['🎯', '100 problems', () => solved() >= 100], ['🎬', '10 videos', () => totalVid() >= 10],
+  ['🌟', 'Level 5', () => lvl() >= 5], ['🛠', '3 skills ≥ 50%', () => S.skills.filter(s => s.p >= 50).length >= 3],
+  ['📅', '7 days on VIXO', () => Object.keys(S.rw.days).length >= 7]
+];
+
+/* ------------------------------------------------------------- data sets */
+const EV = [
+  { id: 'nodes', d: '2026-11-12', t: 'NODES 2026 (online developer conference)', w: 'Online · Nov 11–13', tag: 'Data / Graph', u: 'https://dev.events/meetups/AS/IN/Chennai', s: 'dev.events' },
+  { id: 'aiws', d: '2026-11-28', t: 'Hands-on AI engineering workshop, 9:30 AM–5:30 PM IST', w: 'Chennai · in person', tag: 'AI & ML', u: 'https://www.meetup.com/chennai-microsoft-azure-user-group/', s: 'Chennai Microsoft Azure User Group (Meetup)' },
+  { id: 'techx', d: null, t: 'TechX · AI, Cloud & Data Conference 2026', w: 'PRO Office, Teynampet, Chennai', tag: 'AI & Cloud', u: 'https://www.meetup.com/chennai-microsoft-azure-user-group/', s: 'Meetup · date on the page' },
+  { id: 'scipy', d: '2026-12-19', t: 'SciPy India 2026 Conference (Dec 19–20)', w: 'Chennai', tag: 'Python', u: 'https://dev.events/meetups/AS/IN/Chennai/python', s: 'dev.events' },
+  { id: 'caid', d: null, t: 'Chennai AI Developers: virtual tech talks (Apigee + LLMs, Gemma for agentic apps)', w: 'Online · join from anywhere', tag: 'AI & ML', u: 'https://www.meetup.com/chennai-ai-developers-group', s: 'Meetup · dates on the page' },
+  { id: 'mcpm', d: null, t: 'MCP, Agents and Skills Meetup', w: 'Online', tag: 'AI agents', u: 'https://dev.events/meetups/AS/IN/Chennai/datascience', s: 'dev.events · date on the page' },
+  { id: 'cpy', d: null, t: 'Chennaipy monthly Python meetup (talks, lightning talks, networking tea)', w: 'IMSc, Taramani, Chennai', tag: 'Python', u: 'https://www.meetup.com/Chennaipy/', s: 'Meetup · latest dates on the page' },
+  { id: 'gaic', d: null, t: 'Global AI Community Chennai: developer events', w: 'Chennai', tag: 'AI & ML', u: 'https://www.meetup.com/global-ai-community-chennai/', s: 'Meetup' },
+  { id: 'cccl', d: null, t: 'Claude Community Chennai: builder meetups', w: 'Chennai', tag: 'AI builders', u: 'https://luma.com/cccl', s: 'Luma · open the page for dates' }
+];
+const CE = [
+  ['hr', 'Start free', 'HackerRank Skills Certification (Python, SQL, Problem Solving)', 'HackerRank', 'Beginner', 'Free', 'Python', 'https://www.hackerrank.com/skills-verification', 'Quick timed tests that you can add to your resume and LinkedIn.'],
+  ['kg', 'Start free', 'Kaggle Learn certificates (Python, Pandas, SQL, ML)', 'Kaggle', 'Beginner', 'Free', 'Data Analysis', 'https://www.kaggle.com/learn', 'Short hands-on courses with a completion certificate.'],
+  ['fcc', 'Start free', 'freeCodeCamp certifications (Python, back-end and APIs)', 'freeCodeCamp', 'Beginner', 'Free', 'Full-Stack Development', 'https://www.freecodecamp.org/learn', 'Project-based certificates that prove you built real things.'],
+  ['ibm', 'Start free', 'IBM SkillsBuild free credentials', 'IBM', 'Beginner', 'Free', 'Data Analysis', 'https://skillsbuild.org/', 'Free learning plans in AI, data and cloud with digital badges.'],
+  ['nptel', 'India & college friendly', 'NPTEL courses (Python, DSA, Databases, ML)', 'NPTEL · IIT/IISc', 'Beginner–Intermediate', 'Free course, paid proctored exam', 'Python', 'https://nptel.ac.in/courses', 'Well recognised by Indian colleges and recruiters.'],
+  ['inf', 'India & college friendly', 'Infosys Springboard certificates', 'Infosys', 'Beginner', 'Free', 'Full-Stack Development', 'https://infyspringboard.onwingspan.com/', 'Free courses with certificates, useful before campus placements.'],
+  ['pcep', 'Python & backend', 'PCEP and PCAP: Certified Python Programmer', 'Python Institute', 'Beginner → Associate', 'Paid exam', 'Python', 'https://pythoninstitute.org/', 'Vendor-neutral proof of core Python skills.'],
+  ['hfa', 'AI & ML', 'Hugging Face Agents Course certificate', 'Hugging Face', 'Intermediate', 'Free', 'MCP', 'https://huggingface.co/learn/agents-course', 'Earn certificates by finishing the fundamentals and final project.'],
+  ['mls', 'AI & ML', 'Machine Learning Specialization certificate', 'Coursera · DeepLearning.AI', 'Beginner', 'Paid certificate (financial aid available)', 'Data Analysis', 'https://www.coursera.org/specializations/machine-learning-introduction', 'The standard first ML credential.'],
+  ['ai9', 'AI & ML', 'Microsoft Azure AI Fundamentals (AI-900)', 'Microsoft', 'Beginner', 'Paid exam (check for student offers)', 'Data Analysis', 'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/', 'Microsoft updates its exams often, so confirm the exam is still offered.'],
+  ['aif', 'AI & ML', 'AWS Certified AI Practitioner', 'AWS', 'Beginner', 'Paid exam', 'Data Analysis', 'https://aws.amazon.com/certification/certified-ai-practitioner/', 'Covers generative AI and ML concepts on AWS.'],
+  ['ccp', 'Cloud & DevOps', 'AWS Certified Cloud Practitioner', 'AWS', 'Beginner', 'Paid exam', 'Full-Stack Development', 'https://aws.amazon.com/certification/certified-cloud-practitioner/', 'Most common first cloud certificate.'],
+  ['az9', 'Cloud & DevOps', 'Microsoft Azure Fundamentals (AZ-900)', 'Microsoft', 'Beginner', 'Paid exam (check for student offers)', 'Full-Stack Development', 'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/', 'Cloud basics with a recognised badge.'],
+  ['gce', 'Cloud & DevOps', 'Google Cloud Associate Cloud Engineer', 'Google Cloud', 'Intermediate', 'Paid exam', 'Full-Stack Development', 'https://cloud.google.com/learn/certification/cloud-engineer', 'Hands-on deployment skills on Google Cloud.'],
+  ['kcna', 'Cloud & DevOps', 'KCNA (Kubernetes & Cloud Native Associate) → CKAD', 'Linux Foundation', 'Intermediate', 'Paid exam', 'Full-Stack Development', 'https://training.linuxfoundation.org/certification/kubernetes-and-cloud-native-associate-kcna/', 'Go for CKAD later when you are comfortable with Docker.']
+];
+const CST = ['To do', 'Preparing', 'Earned'];
+const GLOSS = {
+  'Python': 'A readable general-purpose language used for backend, automation, data and AI.',
+  'SQL': 'The language for querying and changing data in relational databases.',
+  'C': 'A low-level language that teaches memory, pointers and how computers really work.',
+  'FastAPI': 'A fast Python framework for building APIs with automatic validation (Pydantic) and docs.',
+  'Django': 'A batteries-included Python web framework with ORM, admin and authentication.',
+  'HTML': 'The markup that gives a web page its structure and content.',
+  'CSS': 'The styling language for layout, colour and responsive design.',
+  'JavaScript': 'The language of the browser; also runs on servers with Node.js.',
+  'Data Analysis': 'Cleaning, exploring and visualising data, mostly with pandas and NumPy in Python.',
+  'MCP': 'Model Context Protocol: a standard way for AI apps to connect to tools and data.',
+  'Full-Stack Development': 'Building both the front end (what users see) and back end (APIs, databases).',
+  'Automation': 'Using scripts to do repetitive work for you, e.g. Python, cron and Selenium.',
+  'Quantitative Aptitude': 'Placement-style maths: percentages, ratios, time and work, profit and loss.',
+  'Logical Reasoning': 'Series, puzzles, syllogisms and data arrangement used in placement tests.'
+};
+const PAGES = [
+  ['rewards', /reward|xp\b|badge|quest|claim|points|chest/], ['certs', /certif|credential/], ['events', /event|luma|hackathon|conference|workshop|linkedin|invit/],
+  ['meetups', /meetup|communit|user group/], ['analysis', /analy|chart|graph|insight|report|heatmap/], ['quizzes', /quiz|aptitude|test me|mock/],
+  ['courses', /course|roadmap|tutorial|learn/], ['skills', /skill|percent/], ['play', /game|play|story|puzzle/], ['github', /github|commit|repo|portfolio/],
+  ['tasks', /remind|todo|task|due|habit/], ['lock', /locker|document|marksheet|resume|\bid\b/], ['dash', /dashboard|home|overview/]
+];
+const tname = k => (TABS.find(x => x[0] === k) || [0, 0, k])[2];
+
+/* ------------------------------------------------------------- charts */
+const ring = (p, sz, id) => `<svg class="ring" viewBox="0 0 120 120" width="${sz}" height="${sz}" role="img" aria-label="${p}%"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset="1" stop-color="#e3b6ff"/></linearGradient></defs><circle cx="60" cy="60" r="50" fill="none" stroke="var(--line)" stroke-width="12"/><circle cx="60" cy="60" r="50" fill="none" stroke="url(#${id})" stroke-width="12" stroke-linecap="round" transform="rotate(-90 60 60)" style="stroke-dasharray:314.16;stroke-dashoffset:${(314.16 * (1 - p / 100)).toFixed(1)};animation:ringin 1.4s cubic-bezier(.2,.7,.2,1)"/><text x="60" y="68" text-anchor="middle" class="rt">${p}%</text></svg>`;
+function radar(items) {
+  const n = items.length, cx = 130, cy = 120, R = 84, pt = (i, v) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [+(cx + Math.cos(a) * R * v / 100).toFixed(1), +(cy + Math.sin(a) * R * v / 100).toFixed(1)]; };
+  const rg = [25, 50, 75, 100].map(v => `<polygon points="${items.map((_, i) => pt(i, v).join(',')).join(' ')}" fill="none" stroke="var(--line)"/>`).join('');
+  const ax = items.map((x, i) => { const [a, b] = pt(i, 116), [x1, y1] = pt(i, 100); return `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="var(--line)"/><text x="${a}" y="${b}" text-anchor="middle" dominant-baseline="middle">${esc(x[0])}</text>`; }).join('');
+  return `<svg viewBox="0 0 260 240" role="img" aria-label="Track strength radar">${rg}${ax}<polygon points="${items.map((x, i) => pt(i, x[1]).join(',')).join(' ')}" fill="rgba(227,182,255,.35)" stroke="var(--pk)" stroke-width="2.5"/>${items.map((x, i) => { const [a, b] = pt(i, x[1]); return `<circle cx="${a}" cy="${b}" r="4" fill="var(--yl)"/>`; }).join('')}</svg>`;
+}
+function spark(v) {
+  if (v.length < 2) return '<p class="mute empty">Take two or more quizzes to see your trend.</p>';
+  const W = 320, H = 120, p = 18, x = i => p + i * (W - 2 * p) / (v.length - 1), y = a => H - p - a / 100 * (H - 2 * p), pts = v.map((a, i) => x(i).toFixed(1) + ',' + y(a).toFixed(1)).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Quiz score trend"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3b6ff" stop-opacity=".55"/><stop offset="1" stop-color="#e3b6ff" stop-opacity="0"/></linearGradient></defs><polygon points="${p},${H - p} ${pts} ${W - p},${H - p}" fill="url(#sg)"/><polyline points="${pts}" fill="none" stroke="var(--yl)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${v.map((a, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(a).toFixed(1)}" r="3.5" fill="var(--cy)"/>`).join('')}<text x="${p}" y="12">latest ${v[v.length - 1]}%</text></svg>`;
+}
+function heat() {
+  const d0 = new Date(); d0.setDate(d0.getDate() - ((d0.getDay() + 6) % 7) - 28); let cells = '';
+  for (let w = 0; w < 5; w++) for (let k = 0; k < 7; k++) {
+    const d = new Date(d0); d.setDate(d0.getDate() + w * 7 + k); const key = ymd(d), fut = key > today(), n = (S.lc.days[key] || 0) + S.q.h.filter(h => h.d === key).length;
+    const l = fut ? 'f' : n === 0 ? 0 : n < 2 ? 1 : n < 4 ? 2 : n < 6 ? 3 : 4;
+    cells += `<i class="hc l${l}" title="${key}: ${n} activities"></i>`;
+  }
+  return `<div class="heat" role="img" aria-label="Five-week activity heatmap">${cells}</div><p class="mute" style="margin:8px 0 0">Last 5 weeks · LeetCode problems + quizzes (Mon–Sun columns)</p>`;
+}
+
+/* -------------------------------------------------------------- views */
+function analysisV() {
+  const cat = Object.entries(S.q.cat); let c = 0, t = 0; cat.forEach(([, v]) => { c += v[0]; t += v[1]; });
+  const acc = t ? Math.round(c / t * 100) : 0, sorted = [...S.skills].sort((a, b) => b.p - a.p), low = [...S.skills].sort((a, b) => a.p - b.p).slice(0, 3), wd = weekDates(), lcw = wd.map(d => S.lc.days[d] || 0),
+    mx = Math.max(3, ...lcw), dn = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'], hq = S.q.h.slice(-12).map(h => h.n ? Math.round(h.c / h.n * 100) : 0),
+    rad = SK.map(([g]) => [g.split(/[ &]/)[0], mean(S.skills.filter(s => s.g === g))]).concat([['Accuracy', acc]]),
+    dqs = dq().filter(q => q.id !== 'chest'), dDone = dqs.filter(q => q.claimed || q.v >= q.g).length, xpNext = S.rw.xp % 150;
+  const bars = l => l.map(s => `<div style="margin:9px 0"><div class="row sb"><span>${esc(s[0])}</span><b>${s[1]}%${s[2] ? ` <span class="mute">(${s[2]})</span>` : ''}</b></div><div class="bar"><i style="width:${s[1]}%"></i></div></div>`).join('');
+  const medal = ['🥇', '🥈', '🥉'];
+  return `<div class="note">${sorted[0].p > 0 ? `Strongest: <b>${esc(sorted[0].n)}</b> (${sorted[0].p}%). Needs attention: <b>${esc(low[0].n)}</b> (${low[0].p}%). Quiz accuracy: ${acc}%.` : 'Take a few quizzes and these charts fill in with your real progress.'}</div>
+  <div class="card"><div class="anh">${ring(perf(), 150, 'rgA')}<div><span class="tag">Level ${lvl()} · ${rank()}</span><h3 style="margin:10px 0 6px;font:400 24px var(--d);text-transform:uppercase">Your performance</h3><p class="mute" style="margin:0 0 10px">${perfRows().map(([n, p, w]) => n.split(' ')[0] + ' ' + p + '% (×' + w + ')').join(' · ')}</p><div class="row sb"><span class="mute">XP to next level</span><b>${xpNext}/150</b></div><div class="bar" style="margin-top:6px"><i style="width:${Math.round(xpNext / 150 * 100)}%"></i></div></div></div></div>
+  <div class="stats" style="margin-top:14px">
+   <div class="card stat"><div class="ico">🎯</div><span class="mute">Skills average</span><b>${avg()}%</b></div>
+   <div class="card stat"><div class="ico">🧠</div><span class="mute">Quiz accuracy</span><b>${acc}%</b></div>
+   <div class="card stat"><div class="ico">🔥</div><span class="mute">LeetCode streak</span><b>${streak()} days</b></div>
+   <div class="card stat"><div class="ico">🏆</div><span class="mute">Total XP</span><b>${S.rw.xp}</b></div>
+   <div class="card stat"><div class="ico">⏱</div><span class="mute">Time on VIXO</span><b>${Math.floor(S.rw.sec / 3600)}h ${Math.floor(S.rw.sec % 3600 / 60)}m</b></div>
+   <div class="card stat"><div class="ico">🎬</div><span class="mute">Videos opened</span><b>${totalVid()}</b></div></div>
+  <h3 class="sec">Strength and activity</h3>
+  <div class="ch"><div class="card"><b>Track strength</b>${radar(rad)}</div>
+   <div class="card"><b>This week · LeetCode per day</b><div class="wk wkb" style="margin-top:14px">${wd.map((d, i) => `<div class="${d === today() ? 'tdy' : ''}"><span>${lcw[i] || ''}</span><i style="height:${Math.max(6, Math.round(lcw[i] / mx * 84))}px"></i><span>${dn[i]}</span></div>`).join('')}</div></div>
+   <div class="card"><b>Activity heatmap</b><div style="margin-top:12px">${heat()}</div></div>
+   <div class="card"><b>Quiz score trend</b>${spark(hq)}</div></div>
+  <h3 class="sec">Skills leaderboard</h3>
+  <div class="ch"><div class="card"><b>Top skills</b>${sorted.slice(0, 5).map((s, i) => `<div class="lb"><span>${medal[i] || i + 1}</span><div><div>${esc(s.n)}</div><div class="bar" style="margin-top:4px"><i style="width:${s.p}%"></i></div></div><b>${s.p}%</b></div>`).join('')}</div>
+   <div class="card"><b>Focus next (lowest skills)</b>${low.map(s => `<div class="lb"><span>🎯</span><div><div>${esc(s.n)}</div><div class="bar" style="margin-top:4px"><i style="width:${s.p}%"></i></div></div><button class="btn sm" data-q="p:${s.id}">Quiz</button></div>`).join('')}</div>
+   <div class="card"><b>Accuracy by topic</b>${cat.length ? bars(cat.map(([n, v]) => [n, Math.round(v[0] / v[1] * 100), v[0] + '/' + v[1]])) : '<p class="mute empty">Answer quiz questions to see topic accuracy.</p>'}</div>
+   <div class="card"><b>Today's quests</b><p class="mute" style="margin:8px 0">${dDone}/${dqs.length} done · ${loginStreak()}-day login streak</p><div class="bar"><i style="width:${Math.round(dDone / dqs.length * 100)}%"></i></div><p style="margin:14px 0 0"><button class="btn sm" data-tab="rewards">Open rewards ▸</button></p></div></div>`;
+}
+function qrows(list, k) {
+  return list.map(q => {
+    const done = q.v >= q.g, pct = Math.min(100, Math.round(q.v / q.g * 100));
+    const act = q.claimed ? '<span class="tag">✓ Claimed</span>' : done ? `<button class="btn sm" data-cl="${k}:${q.id}">Claim +${q.xp} XP</button>` : (q.url ? `<a class="btn alt sm" target="_blank" rel="noopener" href="${q.url}">Open ↗</a>` : q.go ? `<button class="btn alt sm" data-tab="${q.go}">Go ▸</button>` : '');
+    return `<div class="qrow"><div class="qi">${q.i}</div><div><b>${esc(q.n)}</b></div><div class="qa"><span class="xp">+${q.xp} XP</span>${act}</div><div class="bar ${done ? 'ok' : ''}"><i style="width:${pct}%"></i></div><div class="pr">${q.v}/${q.g}</div></div>`;
+  }).join('');
+}
+function rewardsV() {
+  const d = dq(), w = wq(), dd = d.filter(q => q.claimed).length, ww = w.filter(q => q.claimed).length, into = S.rw.xp % 150;
+  return `<div class="note">Earn XP for daily and weekly quests, claim them, and level up. Daily quests reset at midnight and weekly quests every Monday. <b>Resets in <span id="rst">--:--:--</span></b></div>
+  <div class="card rwhero"><div class="lvl" style="--p:${Math.round(into / 150 * 100)}"><div><b>${lvl()}</b><small>LEVEL</small></div></div><div><span class="tag">${rank()}</span><h3 style="margin:10px 0 4px;font:400 26px var(--d);text-transform:uppercase">${S.rw.xp} XP</h3><p class="mute" style="margin:0 0 8px">${150 - into} XP to level ${lvl() + 1} · ${loginStreak()}-day login streak · ${streak()}-day LeetCode streak</p><div class="bar"><i style="width:${Math.round(into / 150 * 100)}%"></i></div></div></div>
+  <h3 class="sec">Daily quests <span class="mute">${dd}/${d.length} claimed</span></h3><div class="card">${qrows(d, 'd')}</div>
+  <h3 class="sec">Weekly quests <span class="mute">${ww}/${w.length} claimed</span></h3><div class="card">${qrows(w, 'w')}</div>
+  <h3 class="sec">Badges <span class="mute">${BG.filter(b => b[2]()).length}/${BG.length}</span></h3><div class="card"><div class="bdg">${BG.map(b => { const on = b[2](); return `<div class="${on ? 'on' : 'off'}"><b>${b[0]}</b>${b[1]}</div>`; }).join('')}</div></div>`;
+}
+function certsV() {
+  const earned = CE.filter(c => (S.ce[c[0]] || 0) === 2).length, prep = CE.filter(c => (S.ce[c[0]] || 0) === 1).length, groups = [...new Set(CE.map(c => c[1]))];
+  return `<div class="note">Certifications that fit a Python, AI and backend software engineering path. Suggested order: start with the free ones (HackerRank, Kaggle, freeCodeCamp, NPTEL), then Python Institute PCEP or an AI/cloud fundamentals exam, then a cloud practitioner certificate. Fees, exam codes and student offers change, so confirm on each page. Tap the status button to track yours.</div>
+  <div class="card" style="margin-bottom:6px"><div class="row sb"><b>Your certifications</b><span class="mute">${earned} earned · ${prep} preparing · ${CE.length} listed</span></div><div class="bar" style="margin-top:8px"><i style="width:${Math.round(earned / CE.length * 100)}%"></i></div></div>`
+    + groups.map(g => `<h3 class="sec">${esc(g)}</h3><div class="cols">${CE.filter(c => c[1] === g).map(c => { const s = S.ce[c[0]] || 0; return `<div class="card course"><div class="row sb"><span class="tag">${esc(c[4])}</span><span class="mute">${esc(c[5])}</span></div><h4>${esc(c[2])}</h4><p class="mute" style="margin:0 0 6px">${esc(c[3])} · builds ${esc(c[6])}</p><p class="mute" style="margin:0 0 12px">${esc(c[8])}</p><div class="row sb"><button class="btn ${s === 2 ? '' : 'alt'} sm" data-ce="${c[0]}">${CST[s]}</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(c[7])}">Open ↗</a></div></div>`; }).join('')}</div>`).join('');
+}
+function eventsV() {
+  const t = today(), list = [...EV].sort((a, b) => (a.d || '9') .localeCompare(b.d || '9')).filter(e => !e.d || e.d >= t);
+  const L = S.links;
+  return `<div class="note">Checked on 11 Nov 2026 using public listings from dev.events and Meetup pages. Luma calendars and LinkedIn need a live or signed-in view, so open those pages for the newest dates. Events with no date here show it on the linked page.</div>
+  <div class="card" style="margin-bottom:14px"><div class="row sb"><b>LinkedIn requests</b><span class="mute">${S.li.t ? 'last checked ' + esc(S.li.t) : 'not checked yet'}</span></div><p class="mute" style="margin:8px 0">I can't read your LinkedIn inbox from this page (it needs your sign-in), so open the links below and note how many are waiting. A daily reminder is already added to your Reminders.</p><div class="row"><a class="btn sm" target="_blank" rel="noopener" href="https://www.linkedin.com/mynetwork/invitation-manager/">Connection requests ↗</a><a class="btn alt sm" target="_blank" rel="noopener" href="https://www.linkedin.com/notifications/">Notifications ↗</a><a class="btn alt sm" target="_blank" rel="noopener" href="https://www.linkedin.com/messaging/">Messages ↗</a><a class="btn alt sm" target="_blank" rel="noopener" href="${esc(L.li)}">My feed ↗</a></div>
+  <form id="lif" class="row" style="margin-top:12px"><label class="mute">Pending requests: <input type="number" min="0" name="n" value="${S.li.n || 0}" style="width:90px"></label><button class="btn sm">Save</button></form></div>
+  <div class="row" style="margin-bottom:14px"><a class="btn" target="_blank" rel="noopener" href="https://luma.com/discover">Luma Discover ↗</a><a class="btn alt" target="_blank" rel="noopener" href="https://www.meetup.com/home/">Meetup home ↗</a><button class="btn alt" data-tab="meetups">All groups</button></div>
+  <h3 class="sec">Upcoming in Chennai and online</h3><div class="cols">${list.map(e => `<div class="card course"><div class="row sb"><span class="tag">${esc(e.tag)}</span><span class="mute">${e.d ? esc(e.d) : 'see page'}</span></div><h4>${esc(e.t)}</h4><p class="mute" style="margin:0 0 4px">${esc(e.w)}</p><p class="mute" style="margin:0 0 12px">Source: ${esc(e.s)}</p><div class="row sb"><button class="btn alt sm" data-er="${e.id}">Remind me</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(e.u)}">Open ↗</a></div></div>`).join('')}</div>`;
+}
+const CUSTOM = { analysis: analysisV, rewards: rewardsV, certs: certsV, events: eventsV };
+
+/* -------------------------------------------------- render wrapper + post */
+const mqItems = () => ['Python', 'FastAPI', 'Django', 'SQL', 'MCP', 'Data Analysis', 'JavaScript', 'LeetCode', 'Aptitude', 'Full-Stack'].map(x => `<span>${x}</span>`).join('');
+function strip() {
+  const d = dq().filter(q => q.id !== 'chest'), n = d.filter(q => q.claimed || q.v >= q.g).length;
+  return `<div class="card strip" id="rwstrip"><div><b>Level ${lvl()} · ${rank()}</b><div class="mute">${S.rw.xp} XP · today's quests ${n}/${d.length} · ${loginStreak()}-day login streak</div></div><div class="row"><button class="btn sm" data-tab="rewards">Claim rewards ▸</button><button class="btn alt sm" data-tab="certs">Certifications</button></div></div>`;
+}
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); if (e.target.dataset.cu) countUp(e.target); } }), { threshold: .08, rootMargin: '0px 0px -5% 0px' }) : null;
+function countUp(el) {
+  const m = /^(\d+)(.*)$/.exec(el.dataset.cu); if (!m || reduce) { el.textContent = el.dataset.cu; return; }
+  const to = +m[1], t0 = performance.now();
+  (function f(n) { const k = Math.min(1, (n - t0) / 900); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))) + m[2]; if (k < 1) requestAnimationFrame(f); })(t0);
+}
+function post() {
+  if (tab === 'tasks') {
+    const f = document.querySelector('form[data-form="task"]');
+    if (f && !f.querySelector('[name=rep]')) { const l = document.createElement('label'); l.className = 'rep'; l.innerHTML = '<input type="checkbox" name="rep" checked> Every day'; f.insertBefore(l, f.querySelector('button')); }
+    document.querySelectorAll('.task').forEach(r => { const cb = r.querySelector('[data-tk]'), t = cb && S.tasks.find(x => x.id === cb.dataset.tk), m = r.querySelector('.mute'); if (t && t.rep && m) { m.textContent = '↻ every day · ' + (t.done ? 'done today' : 'due today'); m.classList.remove('over'); } });
+  }
+  if (tab === 'dash') { const h = document.querySelector('#view .hero'); if (h && !document.getElementById('rwstrip')) h.insertAdjacentHTML('afterend', `<div class="mq2" aria-hidden="true"><div>${mqItems()}${mqItems()}</div></div>` + strip()); }
+  const v = document.getElementById('view');
+  v.querySelectorAll('.card,h3.sec,.note,.hero,.mq2').forEach((el, i) => {
+    if (io && !reduce) { el.classList.add('rv'); el.style.setProperty('--d', (i % 4) * 70 + 'ms'); io.observe(el); }
+  });
+  v.querySelectorAll('.stat b').forEach(b => { const m = /^(\d+)(.*)$/.exec(b.textContent.trim()); if (m && io && !reduce) { b.dataset.cu = b.textContent.trim(); b.textContent = '0' + m[2]; io.observe(b); } });
+}
+const prev = render;
+render = function () {
+  rollDaily();
+  const t = tab;
+  if (CUSTOM[t]) {
+    tab = 'dash'; prev(); tab = t;
+    document.querySelectorAll('.nv[data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+    document.getElementById('ttl').textContent = tname(t);
+    document.getElementById('view').innerHTML = CUSTOM[t]();
+  } else prev();
+  post();
+};
+
+/* ---------------------------------------- clock, progress bar, parallax */
+const top1 = document.querySelector('.top > div:first-child');
+const clk = document.createElement('p'); clk.id = 'clk'; clk.className = 'mute';
+clk.innerHTML = '<span>🕒 <b id="clk-t">--:--:--</b></span><span>⏱ session <b id="clk-s">00:00:00</b></span><span>total <b id="clk-a">0h 0m 0s</b></span><button class="btn alt sm" id="thm" type="button"></button>';
+document.getElementById('dt').after(clk);
+const thm = document.getElementById('thm'); const thmTxt = () => thm.textContent = S.rw.theme ? '🌙 Dark' : '☀ Bright';
+thmTxt(); thm.onclick = () => { S.rw.theme = S.rw.theme ? 0 : 1; applyTheme(); thmTxt(); save(); };
+const spb = document.createElement('div'); spb.id = 'spb'; document.body.appendChild(spb);
+const t0 = Date.now(); let lastDay = today(), tk = 0;
+function clock() {
+  const n = new Date(), sec = Math.floor((Date.now() - t0) / 1000);
+  document.getElementById('clk-t').textContent = n.toLocaleTimeString('en-GB');
+  document.getElementById('clk-s').textContent = hms(sec);
+  if (!document.hidden) S.rw.sec++;
+  document.getElementById('clk-a').textContent = Math.floor(S.rw.sec / 3600) + 'h ' + Math.floor(S.rw.sec % 3600 / 60) + 'm ' + (S.rw.sec % 60) + 's';
+  const rs = document.getElementById('rst'); if (rs) { const e = new Date(); e.setHours(24, 0, 0, 0); rs.textContent = hms(Math.floor((e - n) / 1000)); }
+  if (++tk % 15 === 0) save();
+  if (today() !== lastDay) { lastDay = today(); S.rw.days[lastDay] = 1; render(); }
+}
+setInterval(clock, 1000); clock();
+let ticking = false;
+addEventListener('scroll', () => {
+  if (ticking) return; ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false; const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+    spb.style.transform = 'scaleX(' + (h > 0 ? y / h : 0) + ')';
+    if (!reduce) { const v = document.getElementById('bg'); if (v) v.style.transform = 'translate3d(0,' + (y * -0.08) + 'px,0) scale(1.12)'; const sc = document.querySelector('#view .scene'); if (sc) sc.style.translate = '0 ' + Math.min(y, 600) * 0.12 + 'px'; }
+  });
+}, { passive: true });
+
+/* ---------------------------------------------------- click / submit hooks */
+function burst(x, y) {
+  if (reduce) return;
+  for (let i = 0; i < 22; i++) { const p = document.createElement('i'); p.className = 'cf'; const a = Math.random() * 6.28, s = 60 + Math.random() * 90; p.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(a) * s}px;--dy:${Math.sin(a) * s - 40}px;background:${['#e3b6ff', '#ffe9a8', '#9ee6f5', '#9cf0c4'][i % 4]}`; document.body.appendChild(p); setTimeout(() => p.remove(), 900); }
+}
+document.addEventListener('click', e => {
+  const yt = e.target.closest('a[href*="youtube.com"]'); if (yt) { S.rw.vid[today()] = (S.rw.vid[today()] || 0) + 1; save(); }
+  const cl = e.target.closest('[data-cl]');
+  if (cl) {
+    const [k, id] = cl.dataset.cl.split(':'), q = (k === 'd' ? dq() : wq()).find(x => x.id === id);
+    if (q && !q.claimed && q.v >= q.g) { (k === 'd' ? bagD() : bagW())[id] = 1; S.rw.xp += q.xp; save(); const r = cl.getBoundingClientRect(); burst(r.left + r.width / 2, r.top); render(); }
+    return;
+  }
+  const ce = e.target.closest('[data-ce]'); if (ce) { S.ce[ce.dataset.ce] = ((S.ce[ce.dataset.ce] || 0) + 1) % 3; save(); render(); return; }
+  const er = e.target.closest('[data-er]');
+  if (er) { const ev = EV.find(x => x.id === er.dataset.er), d = new Date(); d.setDate(d.getDate() + 7); S.tasks.push({ id: uid(), t: ev.d ? 'Attend: ' + ev.t : 'Check dates: ' + ev.t, due: ev.d || ymd(d), done: false }); save(); er.textContent = 'Reminder added ✓'; er.disabled = true; return; }
+  if (e.target.closest('.acts [data-tab]')) { document.getElementById('side').classList.remove('open'); scrollTo(0, 0); }
+});
+document.addEventListener('change', e => { /* repeat flag is set after the original handler saves */ });
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.dataset && f.dataset.form === 'task') {
+    const rep = new FormData(f).get('rep'), t = S.tasks[S.tasks.length - 1];
+    if (rep && t && !t.rep) { t.rep = true; t.rd = today(); t.due = today(); save(); render(); }
+  }
+  if (f.id === 'lif') { e.preventDefault(); S.li.n = Math.max(0, +f.n.value || 0); S.li.t = today(); save(); render(); }
+});
+
+/* -------------------------------------------------------- smarter AI */
+const SITE = ' [Site pages: Dashboard, Analysis, My Skills, Quizzes, Rewards, Courses, Certifications, Meetups, Events & Alerts, Play & Stories, GitHub, Reminders, Locker. When useful, say which page to open.]';
+function route(q) {
+  const l = q.toLowerCase(); let t = '', acts = [], docs = [], final = true;
+  const go = (k, lab) => { if (!acts.some(a => a.tab === k)) acts.push({ tab: k, l: lab || ('Open ' + tname(k) + ' ▸') }); };
+  const ln = (lab, u) => acts.push({ u, l: lab + ' ↗' });
+  const sk = skillIn(l), isProg = /percent|%|progress|status|how am i|how far|video|youtube|watch|quiz|practice/.test(l);
+  if (/reward|\bxp\b|badge|quest|claim|points|chest|\blevel\b/.test(l)) {
+    const d = dq().filter(x => x.id !== 'chest'), w = wq().filter(x => x.id !== 'chest'), ready = d.concat(w).filter(x => !x.claimed && x.v >= x.g);
+    t = `You are level ${lvl()} (${rank()}) with ${S.rw.xp} XP.\nToday: ${d.filter(x => x.claimed || x.v >= x.g).length}/${d.length} daily quests done. This week: ${w.filter(x => x.claimed || x.v >= x.g).length}/${w.length} weekly quests done.\n${ready.length ? 'Ready to claim: ' + ready.map(x => x.n + ' (+' + x.xp + ')').join(', ') + '.' : 'Nothing to claim yet. Finish a quest first.'}`; go('rewards');
+  } else if (/certif|credential/.test(l) && !/marksheet|my certificate|show my/.test(l)) {
+    t = 'Certifications worth doing for Python, AI and backend (free first):\n' + CE.filter(c => /Free/.test(c[5])).slice(0, 5).map(c => `• ${c[2]} (${c[3]})`).join('\n') + '\n\nThen: Python Institute PCEP, AWS Cloud Practitioner or AI Practitioner, Azure AZ-900/AI-900. Fees change, so check each page.'; go('certs'); ln('HackerRank', 'https://www.hackerrank.com/skills-verification'); ln('Kaggle Learn', 'https://www.kaggle.com/learn');
+  } else if (/linkedin|invit|connection request|inbox/.test(l)) {
+    t = `I can't read your LinkedIn inbox because it needs your sign-in. Open the links below to see new requests. You last noted ${S.li.n || 0} pending${S.li.t ? ' on ' + S.li.t : ''}, and "Check LinkedIn requests" is in your daily reminders.`; ln('Connection requests', 'https://www.linkedin.com/mynetwork/invitation-manager/'); ln('Notifications', 'https://www.linkedin.com/notifications/'); go('events', 'Events & Alerts ▸');
+  } else if (/event|luma|hackathon|conference|workshop|happening|upcoming/.test(l) || (/meetup/.test(l) && /new|upcoming|when|latest|today|week|next/.test(l))) {
+    const up = EV.filter(e => e.d && e.d >= today()).sort((a, b) => a.d.localeCompare(b.d));
+    t = 'Upcoming (checked 11 Nov 2026):\n' + up.map(e => `• ${e.d} — ${e.t} (${e.w})`).join('\n') + '\n\nMore with dates on their pages: Chennaipy, Chennai AI Developers, Claude Community Chennai (Luma).'; go('events', 'Events & Alerts ▸'); ln('Luma Discover', 'https://luma.com/discover'); ln('Meetup', 'https://www.meetup.com/home/');
+  } else if (/\btime\b|clock|how long|session|running/.test(l)) {
+    t = `Now: ${new Date().toLocaleTimeString('en-GB')}. This session: ${hms(Math.floor((Date.now() - t0) / 1000))}. Total on VIXO: ${Math.floor(S.rw.sec / 3600)}h ${Math.floor(S.rw.sec % 3600 / 60)}m.`;
+  } else if (/bright|light mode|dark mode|theme/.test(l)) {
+    S.rw.theme = /dark/.test(l) ? 0 : 1; applyTheme(); thmTxt(); save(); t = S.rw.theme ? 'Switched to Bright mode. Use the toggle under the date to change back.' : 'Switched to dark mode.';
+  } else if (sk && !isProg && /learn|what is|what's|explain|resource|course|tutorial|how|start|roadmap|study|best/.test(l)) {
+    const s = S.skills.find(x => x.n === sk), cs = CO.filter(c => c[4] === sk).slice(0, 2), v = vids(sk);
+    t = `${sk}: ${GLOSS[sk] || 'one of your resume skills.'}\nYou are at ${s ? s.p : 0}%.` + (cs.length ? '\nCourses:\n' + cs.map(c => `• ${c[1]} (${c[2]})`).join('\n') : '');
+    cs.forEach(c => ln(c[1].length > 26 ? c[2] : c[1], c[5])); ln('Tamil video', v.ta); ln('English video', v.en); if (s && s.u) ln('Docs', s.u); go('skills', 'My Skills ▸');
+  } else {
+    const base = local(q);
+    if (!/^Try:/.test(base.t)) { t = base.t; docs = base.docs; }
+    else {
+      const ext = [[/leetcode/, 'LeetCode', 'https://leetcode.com/problemset/'], [/github/, 'GitHub', 'https://github.com/' + S.links.gh], [/portfolio/, 'Portfolio', S.links.pf], [/luma/, 'Luma', 'https://luma.com/discover'], [/meetup/, 'Meetup', 'https://www.meetup.com/home/'], [/kaggle/, 'Kaggle', 'https://www.kaggle.com/learn'], [/hackerrank/, 'HackerRank', 'https://www.hackerrank.com/']].filter(x => x[0].test(l));
+      const pg = PAGES.filter(p => p[1].test(l)).slice(0, 2);
+      if (ext.length || pg.length) { t = 'Here is where to go:'; ext.forEach(x => ln(x[1], x[2])); pg.forEach(p => go(p[0])); }
+      else { t = `I don't have a built-in answer for that. Search it, or tell me a skill (e.g. "how do I learn FastAPI") or a page (rewards, events, certifications, analysis).`; final = false; ln('Search Google', 'https://www.google.com/search?q=' + encodeURIComponent(q)); ln('YouTube', 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q)); }
+    }
+    PAGES.filter(p => p[1].test(l)).slice(0, 2).forEach(p => go(p[0]));
+  }
+  return { t, acts, docs, final };
+}
+function addActs(el, acts) {
+  if (!acts.length) return;
+  const w = document.createElement('div'); w.className = 'acts';
+  acts.forEach(a => { if (a.tab) { const b = document.createElement('button'); b.type = 'button'; b.className = 'dl'; b.dataset.tab = a.tab; b.textContent = a.l; w.appendChild(b); } else { const x = document.createElement('a'); x.className = 'dl'; x.href = a.u; x.target = '_blank'; x.rel = 'noopener'; x.textContent = a.l; w.appendChild(x); } });
+  el.appendChild(w);
+}
+send = async function (q) {
+  bubble('u', q); const el = bubble('b', 'Thinking…'); const k = key(), r = route(q); let text = null;
+  if (k && !r.final) { try { text = await claude(q + SITE, k); } catch (e) { } }
+  if (!text) text = r.t + (k && !r.final ? '\n\n(Claude couldn’t be reached, so this is a built-in answer.)' : '');
+  el.textContent = text; r.docs.forEach(d => card(el, d)); addActs(el, r.acts);
+  document.getElementById('log').scrollTop = 1e9; hist.push({ role: 'user', content: q }, { role: 'assistant', content: text });
+};
+const ch = document.getElementById('chips');
+if (ch && !ch.querySelector('[data-x]')) {
+  ['Today’s rewards', 'New events', 'Certifications', 'How do I learn FastAPI?'].forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.dataset.x = '1'; b.textContent = t; ch.insertBefore(b, ch.firstChild.nextSibling); });
+}
+render();
+}
+if (document.readyState === 'complete') setTimeout(boot, 60); else addEventListener('load', () => setTimeout(boot, 60));
+})();
+
+</script>
 </body>
 </html>
